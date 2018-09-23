@@ -106,6 +106,13 @@
     }
   };
 
+  var removeClassNameBySelector = function (parentObj, selector, className) {
+    var obj = parentObj.querySelector(selector);
+    if (obj) {
+      removeClassName(obj, className);
+    }
+  };
+
   var replaceClassNameBySelector = function (parentObj, selector, className, classSet) {
     var obj = parentObj.querySelector(selector);
     if (obj) {
@@ -263,8 +270,13 @@
       }
       insertionPoint.appendChild(fragment);
     }
-    removeClassName(insertionPoint, '.goods__cards--empty');
-    addClassNameBySelector(insertionPoint, '.goods__card-empty', 'visually-hidden');
+    if (dataArray.length !== 0) {
+      removeClassName(insertionPoint, '.goods__cards--empty');
+      addClassNameBySelector(insertionPoint, '.goods__card-empty', 'visually-hidden');
+    } else {
+      addClassName(insertionPoint, '.goods__cards--empty');
+      removeClassNameBySelector(insertionPoint, '.goods__card-empty', 'visually-hidden');
+    }
   };
 
   var onCatalogClick = function (evt) {
@@ -372,6 +384,64 @@
     return false;
   };
 
+  var getXCoord = function (elem) {
+    return elem.getBoundingClientRect().x;
+  };
+
+  var getLimitedValue = function (newValue, leftLimit, rightLimit) {
+    if (newValue < leftLimit) {
+      return leftLimit;
+    }
+    if (newValue > rightLimit) {
+      return rightLimit;
+    }
+    return newValue;
+  };
+
+  var onPinMouseDown = function (evt) {
+    var refreshSliderState = function (moveUpEvt) {
+      var newX = moveUpEvt.pageX - shiftX - sliderX;
+      var rangeWidth = rangeFilter.offsetWidth;
+      var rangeLeft = getXCoord(rangeFilter);
+      var sliderValue = getLimitedValue(newX, 0, rangeWidth) / rangeWidth * 100;
+
+      currentPin.style.left = sliderValue + '%';
+      var pinALeft = 100 * (getXCoord(rangePinA) - rangeLeft) / rangeWidth;
+      var pinBLeft = 100 * (getXCoord(rangePinB) - rangeLeft) / rangeWidth;
+
+      if (pinALeft > pinBLeft) {
+        rangeLine.style.left = pinBLeft + '%';
+        rangeLine.style.right = (100 - pinALeft) + '%';
+      } else {
+        rangeLine.style.left = pinALeft + '%';
+        rangeLine.style.right = (100 - pinBLeft) + '%';
+      }
+      if (rangePriceMin && rangePriceMax) {
+        rangePriceMin.textContent = Math.floor(Math.min(pinALeft, pinBLeft));
+        rangePriceMax.textContent = Math.floor(Math.max(pinALeft, pinBLeft));
+      }
+    };
+
+    var onPinMouseUp = function (upEvt) {
+      refreshSliderState(upEvt);
+      document.removeEventListener('mouseup', onPinMouseUp);
+      document.removeEventListener('mousemove', onPinMouseMove);
+    };
+
+    var onPinMouseMove = function (moveEvt) {
+      refreshSliderState(moveEvt);
+    };
+
+    var currentPin = evt.target;
+    var sliderX = getXCoord(rangeFilter);
+    var pinX = getXCoord(currentPin);
+    var shiftX = evt.pageX - pinX;
+    evt.preventDefault();
+    document.addEventListener('mouseup', onPinMouseUp);
+    document.addEventListener('mousemove', onPinMouseMove);
+  };
+
+
   var initCatalog = function () {
     renderCatalog(catalogCards);
     renderBasket(basketCards);
@@ -380,6 +450,10 @@
     }
     if (deliverButtons) {
       deliverButtons.addEventListener('click', onDeliverButtonsClick);
+    }
+    if (rangeFilter && rangeLine && rangePinA && rangePinB) {
+      rangePinA.addEventListener('mousedown', onPinMouseDown);
+      rangePinB.addEventListener('mousedown', onPinMouseDown);
     }
   };
 
@@ -392,6 +466,14 @@
 
   var deliverContainer = document.querySelector('.deliver');
   var deliverButtons = getElementBySelector(deliverContainer, '.deliver__toggle');
+
+  var rangeFilter = document.querySelector('.range__filter');
+  var rangeLine = getElementBySelector(rangeFilter, '.range__fill-line');
+  var rangePinA = getElementBySelector(rangeFilter, '.range__btn--left');
+  var rangePinB = getElementBySelector(rangeFilter, '.range__btn--right');
+
+  var rangePriceMin = document.querySelector('.range__price--min');
+  var rangePriceMax = document.querySelector('.range__price--max');
 
   var catalogCards = generateObjectArray(CATALOG_OBJECT_AMOUNT);
   var basketCards = [];
