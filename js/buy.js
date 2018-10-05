@@ -60,7 +60,7 @@
   };
 
 
-  window.form = {
+  window.buy = {
     init: init
   };
 

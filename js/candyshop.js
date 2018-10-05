@@ -2,44 +2,35 @@
 
 (function () {
 
-  var basketContainer = document.querySelector('.goods__cards');
-  var basketElementTemplate = window.dom.getTemplateContent('#card-order', '.goods_card');
-  var basketMainHeader = document.querySelector('.main-header__basket');
+  var initMessages = function () {
+    var modals = document.querySelectorAll('.modal');
+    return (modals.length === 2) ? {errorMessage: modals[0], successMessage: modals[1]} : null;
+  };
 
-  var catalogContainer = document.querySelector('.catalog__cards');
-  var catalogElementContainer = window.dom.getTemplateContent('#card', '.catalog__card');
-
-  var deliverContainer = document.querySelector('.deliver');
-  var deliverButtons = window.dom.getElementBySelector(deliverContainer, '.deliver__toggle');
-
-  var paymentContainer = document.querySelector('.payment');
-  var paymentButtons = window.dom.getElementBySelector(paymentContainer, '.payment__method');
-
-  var rangeFilter = document.querySelector('.range__filter');
-  var rangeLine = window.dom.getElementBySelector(rangeFilter, '.range__fill-line');
-  var rangePinA = window.dom.getElementBySelector(rangeFilter, '.range__btn--left');
-  var rangePinB = window.dom.getElementBySelector(rangeFilter, '.range__btn--right');
-
-  var rangePriceMin = document.querySelector('.range__price--min');
-  var rangePriceMax = document.querySelector('.range__price--max');
+  var main = document.querySelector('main');
+  var rangeFilter = window.dom.getElementBySelector(main, '.range__filter');
 
   var links = {
-    basketContainer: basketContainer,
-    basketElementTemplate: basketElementTemplate,
-    basketMainHeader: basketMainHeader,
-    catalogContainer: catalogContainer,
-    catalogElementContainer: catalogElementContainer,
-    deliverContainer: deliverContainer,
-    deliverButtons: deliverButtons,
-    paymentContainer: paymentContainer,
-    paymentButtons: paymentButtons,
-    rangeFilter: rangeFilter,
-    rangeLine: rangeLine,
-    rangePinA: rangePinA,
-    rangePinB: rangePinB,
-    rangePriceMin: rangePriceMin,
-    rangePriceMax: rangePriceMax
+    catalogContainer: document.querySelector('.catalog__cards'),
+    catalogCardTemplate: window.dom.getTemplateContent('#card', '.catalog__card'),
+    basketContainer: document.querySelector('.goods__cards'),
+    basketCardTemplate: window.dom.getTemplateContent('#card-order', '.goods_card'),
+    basketMainHeader: document.querySelector('.main-header__basket'),
+    deliverContainer: window.dom.getElementBySelector(main, '.deliver'),
+    deliverButtons: window.dom.getElementBySelector(main, '.deliver__toggle'),
+    paymentContainer: window.dom.getElementBySelector(main, '.payment'),
+    paymentButtons: window.dom.getElementBySelector(main, '.payment__method'),
+    rangeFilter: window.dom.getElementBySelector(main, '.range__filter'),
+    rangeLine: window.dom.getElementBySelector(rangeFilter, '.range__fill-line'),
+    rangePinA: window.dom.getElementBySelector(rangeFilter, '.range__btn--left'),
+    rangePinB: window.dom.getElementBySelector(rangeFilter, '.range__btn--right'),
+    rangePriceMin: window.dom.getElementBySelector(main, '.range__price--min'),
+    rangePriceMax: window.dom.getElementBySelector(main, '.range__price--min'),
+    messages: initMessages()
   };
+
+  main = null;
+  rangeFilter = null;
 
   window.goods(links);
 

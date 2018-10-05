@@ -1,20 +1,16 @@
 'use strict';
 
 (function () {
-  var init = function (messageLink, messageTitle, hiddenButtons) {
+  var init = function (messageLink, messageTitle) {
 
     var show = function () {
       setMessageInteractivity();
-      window.general.removeClassName(messageLink, 'visually-hidden');
+      window.general.removeClassName(messageLink, 'modal--hidden');
     };
 
     var hide = function () {
       removeMessageInteractivity();
-      window.general.addClassName(messageLink, 'visually-hidden');
-    };
-
-    var onButtonClick = function (evt) {
-      window.events.isEvent(evt, hide);
+      window.general.addClassName(messageLink, 'modal--hidden');
     };
 
     var onDocumentKeyDown = function (evt) {
@@ -27,17 +23,9 @@
       }
     };
 
-    var switchMessageInteractivity = function (action, additionalAction) {
+    var switchMessageInteractivity = function (action) {
       document[action]('keydown', onDocumentKeyDown);
       document[action]('click', onDocumentClick);
-      if (messageLink) {
-        Array.prototype.slice.call(buttons).forEach(function (button) {
-          button[action]('click', onButtonClick);
-          if (hiddenButtons) {
-            window.general[additionalAction](button, 'visually-hidden');
-          }
-        });
-      }
     };
 
     var setMessageInteractivity = function () {
@@ -49,13 +37,12 @@
     };
 
     var setMessageTitle = function (text) {
-      var messageText = window.dom.getElementBySelector(messageLink, 'h2');
+      var messageText = window.dom.getElementBySelector(messageLink, 'p');
       if (messageText) {
         messageText.textContent = text;
       }
     };
 
-    var buttons = messageLink.querySelectorAll('button');
     if (messageTitle) {
       setMessageTitle(messageTitle);
     }

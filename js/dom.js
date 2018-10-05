@@ -11,7 +11,7 @@
       Object.keys(classSet).map(function (el) {
         return el;
       }).forEach(function (item) {
-        window.general.removeClassName(obj, item);
+        window.general.removeClassName(obj, classSet[item]);
       });
     }
   };

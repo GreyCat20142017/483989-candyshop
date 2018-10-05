@@ -38,7 +38,7 @@
       }
     };
 
-    var createCatalogElement = function (template, data) {
+    var createCatalogCard = function (template, data) {
       var element = template.cloneNode(true);
       var header = element.querySelector('.card__header');
       var btnWrapper = element.querySelector('.card__btns-wrap');
@@ -57,13 +57,11 @@
       return element;
     };
 
-    var renderCatalog = function (dataArray) {
-      var template = links.catalogElementContainer;
-      var insertionPoint = links.catalogContainer;
+    var renderCatalog = function (dataArray, template, insertionPoint) {
       if (template && insertionPoint) {
         var fragment = document.createDocumentFragment();
         for (var i = 0; i < dataArray.length; i++) {
-          fragment.appendChild(createCatalogElement(template, dataArray[i]));
+          fragment.appendChild(createCatalogCard(template, dataArray[i]));
         }
         insertionPoint.appendChild(fragment);
       }
@@ -71,7 +69,7 @@
       window.dom.addClassNameBySelector(insertionPoint, '.catalog__load', 'visually-hidden');
     };
 
-    var createBasketElement = function (template, data) {
+    var createBasketCard = function (template, data) {
       var element = template.cloneNode(true);
       var orderHeader = element.querySelector('.card-order__header');
       window.dom.setAttributeBySelector(orderHeader, '.card-order__title', 'textContent', data.name);
@@ -83,23 +81,28 @@
       return element;
     };
 
-    var renderBasket = function (dataArray) {
-      var template = links.basketElementTemplate;
-      var insertionPoint = links.basketContainer;
+    var refreshBasketState = function (dataArray) {
+      if (links.basketContainer) {
+        if (dataArray.length === 1) {
+          window.general.removeClassName(links.basketContainer, '.goods__cards--empty');
+          window.dom.addClassNameBySelector(links.basketContainer, '.goods__card-empty', 'visually-hidden');
+        } else if (dataArray.length === 0) {
+          window.general.addClassName(links.basketContainer, '.goods__cards--empty');
+          window.dom.removeClassNameBySelector(links.basketContainer, '.goods__card-empty', 'visually-hidden');
+        }
+      }
+      links.basketMainHeader.textContent = getMainBasketHeaderText(basketCards);
+    };
+
+    var renderBasket = function (dataArray, template, insertionPoint) {
       if (template && insertionPoint) {
         var fragment = document.createDocumentFragment();
         for (var i = 0; i < dataArray.length; i++) {
-          fragment.appendChild(createBasketElement(template, dataArray[i]));
+          fragment.appendChild(createBasketCard(template, dataArray[i]));
         }
         insertionPoint.appendChild(fragment);
       }
-      if (dataArray.length !== 0) {
-        window.general.removeClassName(insertionPoint, '.goods__cards--empty');
-        window.dom.addClassNameBySelector(insertionPoint, '.goods__card-empty', 'visually-hidden');
-      } else {
-        window.general.addClassName(insertionPoint, '.goods__cards--empty');
-        window.dom.removeClassNameBySelector(insertionPoint, '.goods__card-empty', 'visually-hidden');
-      }
+      refreshBasketState(dataArray);
     };
 
     var onCatalogClick = function (evt) {
@@ -158,23 +161,16 @@
       return (totalAmount === 0) ? 'В корзине ничего нет' : 'В корзине ' + totalAmount + ' ' + window.common.getTextForm(totalAmount, ['товар', 'товара', ' товаров']);
     };
 
-    var getIndexByID = function (arr, ind) {
+    var getIndexByID = function (arr, key) {
       return arr.indexOf(arr.filter(function (item) {
-        return item.id === ind;
+        return item.id === key;
       })[0]);
     };
 
-    var checkCatalogAmount = function (source, ind) {
-      if ((source.amount <= CARD_CLASSES_LOW_BORDER) || (source.amount === CARD_CLASSES_UPPER_BORDER)) {
+    var checkCatalogAmount = function (dataRecord, ind) {
+      if ((dataRecord.amount >= CARD_CLASSES_LOW_BORDER) && (dataRecord.amount <= (CARD_CLASSES_UPPER_BORDER + 1))) {
         var element = window.dom.getElementBySelector(links.catalogContainer, '.catalog__card[data-id="' + ind + '"]');
-        window.dom.replaceClassNameByObject(element, getClassNameByAmount(source.amount), CARD_CLASSES);
-      }
-    };
-
-    var checkBasketAmount = function (source, ind) {
-      if (source.amount <= 0) {
-        var element = window.dom.getElementBySelector(links.basketContainer, '.goods_card[data-id="' + ind + '"]');
-        element.parentElement.removeChild(element);
+        window.dom.replaceClassNameByObject(element, getClassNameByAmount(dataRecord.amount), CARD_CLASSES);
       }
     };
 
@@ -194,9 +190,9 @@
             target = Object.assign({}, source);
             target.amount = 1;
             basketCards.push(target);
-            renderBasket([target]);
+            renderBasket([target], links.basketCardTemplate, links.basketContainer);
           }
-          links.basketMainHeader.textContent = getMainBasketHeaderText(basketCards);
+          refreshBasketState(basketCards);
           source.amount = source.amount - 1;
           checkCatalogAmount(source, cardID);
         }
@@ -204,12 +200,28 @@
     };
 
     var removeUnitFromBasket = function (cardID, element) {
-
+      var basketIndex = getIndexByID(basketCards, cardID);
+      var catalogIndex = getIndexByID(catalogCards, cardID);
+      if ((basketIndex >= 0) && (catalogIndex >= 0)) {
+        var source = basketCards[basketIndex];
+        if (source.amount > 0) {
+          var target = catalogCards[catalogIndex];
+          target.amount = target.amount + 1;
+          checkCatalogAmount(target, cardID);
+          source.amount = source.amount - 1;
+          window.dom.setAttributeBySelector(element, '.card-order__count', 'value', source.amount);
+          if (source.amount === 0) {
+            element.remove();
+            basketCards.splice(basketIndex, 1);
+          }
+        }
+        refreshBasketState(basketCards);
+      }
     };
 
     var initCatalog = function () {
-      renderCatalog(catalogCards);
-      renderBasket(basketCards);
+      renderCatalog(catalogCards, links.catalogCardTemplate, links.catalogContainer);
+      renderBasket(basketCards, links.basketCardTemplate, links.basketContainer);
       if (window.hasOwnProperty('backend')) {
         window.backend.getData(onGet, onGetError);
       }
@@ -219,11 +231,14 @@
       if (links.basketContainer) {
         links.basketContainer.addEventListener('click', onBasketClick);
       }
-      if (window.hasOwnProperty('form')) {
-        window.form.init(links);
+      if (window.hasOwnProperty('buy')) {
+        window.buy.init(links);
       }
       if (window.hasOwnProperty('slider')) {
         window.slider.init(links);
+      }
+      if (window.hasOwnProperty('filter')) {
+        window.filter.init(links);
       }
     };
 
@@ -233,13 +248,13 @@
         item.id = 'id-' + index;
         catalogCards.push(item);
       });
-      renderCatalog(catalogCards);
+      renderCatalog(catalogCards, links.catalogCardTemplate, links.catalogContainer);
       // initFilter();
       // renderPhotosByFilter(FILTERS.popular);
     };
 
     var onGetError = function (errorMessage) {
-      // window.message.init(messages.errorMessage, errorMessage, true);
+      // window.message.init(links.messages.errorMessage, errorMessage);
     };
 
 
