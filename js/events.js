@@ -1,19 +1,12 @@
-'use strict';
-
 (function () {
-  var ESC_KEYCODE = 27;
-
-  window.events = {
-    isEscEvent: function (evt, action) {
-      if (evt.keyCode === ESC_KEYCODE) {
-        evt.preventDefault();
-        action();
-      }
-    },
-
-    isEvent: function (evt, action) {
-      evt.preventDefault();
-      action();
-    }
-  };
+	window.candyevents = {
+		LOAD_CARDS: 'LOAD_CARDS',
+		ADD_TO_BASKET: 'ADD_TO_BASKET',
+    EMPTY_BASKET: 'EMPTY_BASKET',
+    NOT_EMPTY_BASKET: 'NOT_EMPTY_BASKET',
+		SWITCH_TAB: 'SWITCH_TAB',
+		CHANGE_FILTER: 'CHANGE_FILTER',
+		CHANGE_SORT: 'CHANGE_SORT',
+    CHANGE_PRICE: 'CHANGE_SORT'
+	}
 })();

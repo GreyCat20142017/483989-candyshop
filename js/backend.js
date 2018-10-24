@@ -1,7 +1,7 @@
 'use strict';
 
 (function () {
-  var URL_GET = 'https://greycat20142017.github.io/book/data.json';
+  var URL_GET = 'https://greycat20142017.github.io/pseudodb/candyshop.json';
   var URL_POST = 'https://js.dump.academy/candyshop';
   var RESPONSE_TYPE = 'json';
   var RESPONSE_TIMEOUT = 8000;

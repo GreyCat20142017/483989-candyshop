@@ -5,14 +5,32 @@
   var removeAlternatives = function (obj, classSet) {
     if (Array.isArray(classSet)) {
       classSet.forEach(function (item) {
-        window.general.removeClassName(obj, item);
+        removeClassName(obj, item);
       });
     } else {
       Object.keys(classSet).map(function (el) {
         return el;
       }).forEach(function (item) {
-        window.general.removeClassName(obj, classSet[item]);
+        removeClassName(obj, classSet[item]);
       });
+    }
+  };
+
+   var removeClassName = function (element, className) {
+      if (element && element.classList.contains(className)) {
+        element.classList.remove(className);
+      }
+    };
+
+   var addClassName = function (element, className) {
+      if (element && !element.classList.contains(className)) {
+        element.classList.add(className);
+      }
+    };
+
+  var setFocusOnObject = function (interactiveObject) {
+    if (interactiveObject) {
+      interactiveObject.focus();
     }
   };
 
@@ -45,21 +63,21 @@
     addClassNameBySelector: function (parentElement, selector, className) {
       var descendantElement = parentElement.querySelector(selector);
       if (descendantElement) {
-        window.general.addClassName(descendantElement, className);
+        addClassName(descendantElement, className);
       }
     },
 
     removeClassNameBySelector: function (parentElement, selector, className) {
       var descendantElement = parentElement.querySelector(selector);
       if (descendantElement) {
-        window.general.removeClassName(descendantElement, className);
+        removeClassName(descendantElement, className);
       }
     },
 
     replaceClassNameByObject: function (obj, className, classSet) {
       if (obj) {
         removeAlternatives(obj, classSet);
-        window.general.addClassName(obj, className);
+        addClassName(obj, className);
       }
     },
 
@@ -67,7 +85,7 @@
       var obj = parentObj.querySelector(selector);
       if (obj) {
         removeAlternatives(obj, classSet);
-        window.general.addClassName(obj, className);
+        addClassName(obj, className);
       }
     },
 
@@ -76,7 +94,11 @@
         return parentElement.querySelector(selector);
       }
       return false;
-    }
+    },
+
+    addClassName: addClassName,
+    removeClassName: removeClassName,
+    setFocusOnObject: setFocusOnObject
 
   };
 })();

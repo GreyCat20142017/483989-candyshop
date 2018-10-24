@@ -23,7 +23,7 @@
           window.general.removeClassName(element, 'visually-hidden');
         }
         if (element && !element.classList.contains(className)) {
-          window.general.addClassName(element, 'visually-hidden');
+          window.dom.addClassName(element, 'visually-hidden');
         }
       });
     };

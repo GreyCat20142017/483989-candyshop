@@ -1,6 +1,8 @@
 'use strict';
 
 (function () {
+  var bus = window.mediator.bus;
+  var events = window.candyevents;
 
   var init = function (links) {
     var getLimitedValue = function (newValue, leftLimit, rightLimit) {
@@ -31,10 +33,11 @@
           links.rangeLine.style.left = pinALeft + '%';
           links.rangeLine.style.right = (100 - pinBLeft) + '%';
         }
-        if (links.rangePriceMin && links.rangePriceMax) {
-          links.rangePriceMin.textContent = Math.floor(Math.min(pinALeft, pinBLeft));
-          links.rangePriceMax.textContent = Math.floor(Math.max(pinALeft, pinBLeft));
-        }
+        // if (links.rangePriceMin && links.rangePriceMax) {
+        //   links.rangePriceMin.textContent = Math.floor(Math.min(pinALeft, pinBLeft));
+        //   links.rangePriceMax.textContent = Math.floor(Math.max(pinALeft, pinBLeft));
+        // }
+        bus.emitEvent(events.CHANGE_PRICE, {pinALeft: pinALeft, pinBLeft: pinBLeft});
       };
 
       var onPinMouseUp = function (upEvt) {

@@ -63,14 +63,27 @@
       return reSortedArray;
     },
 
-    getPhotosByRank: function (sourceArray) {
+    getCardsByRating: function (sourceArray) {
       var reSortedArray = sourceArray.slice().sort(function (firstItem, secondItem) {
-        var rank = (firstItem.comments && secondItem.comments) ? (secondItem.comments.length - firstItem.comments.length) : 0;
+        var rank = (firstItem.rating && secondItem.rating) ? (secondItem.rating.value - firstItem.rating.value) : 0;
         if (rank === 0) {
-          rank = (firstItem.likes && secondItem.likes) ? (parseInt(secondItem.likes, 10) - parseInt(firstItem.likes, 10)) : 0;
+          rank = (firstItem.rating && secondItem.rating) ? (secondItem.rating.number - firstItem.rating.number) : 0;
         }
         if (rank === 0) {
-          rank = (firstItem.url && secondItem.url) ? getStringCompareResult(firstItem.url, secondItem.url) : 0;
+          rank = (firstItem.name && secondItem.name) ? getStringCompareResult(firstItem.name, secondItem.name) : 0;
+        }
+        return rank;
+      });
+      return reSortedArray;
+    },
+
+
+    getCardsByPrice: function (sourceArray, ascending) {
+      var reSortedArray = sourceArray.slice().sort(function (firstItem, secondItem) {
+        var direction = ascending ? (-1) : 1;
+        var rank = (firstItem.price && secondItem.price) ? direction * (secondItem.price - firstItem.price) : 0;
+        if (rank === 0) {
+          rank = (firstItem.name && secondItem.name) ? getStringCompareResult(firstItem.name, secondItem.name) : 0;
         }
         return rank;
       });
