@@ -16,17 +16,17 @@
     }
   };
 
-   var removeClassName = function (element, className) {
-      if (element && element.classList.contains(className)) {
-        element.classList.remove(className);
-      }
-    };
+  var removeClassName = function (element, className) {
+    if (element && element.classList.contains(className)) {
+      element.classList.remove(className);
+    }
+  };
 
-   var addClassName = function (element, className) {
-      if (element && !element.classList.contains(className)) {
-        element.classList.add(className);
-      }
-    };
+  var addClassName = function (element, className) {
+    if (element && !element.classList.contains(className)) {
+      element.classList.add(className);
+    }
+  };
 
   var setFocusOnObject = function (interactiveObject) {
     if (interactiveObject) {

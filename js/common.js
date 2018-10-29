@@ -116,6 +116,39 @@
           action.apply(null, parameters);
         }, DEBOUNCE_INTERVAL);
       };
+    },
+
+    getIndexByID: function (arr, key) {
+      return arr.indexOf(arr.filter(function (item) {
+        return item.id === key;
+      })[0]);
+    },
+
+    getKeysArrayFromObject: function (obj) {
+      return Object.keys(obj).map(function (key) {
+        return key;
+      });
+    },
+
+    getArrayFromObject: function (obj) {
+      return Object.keys(obj).map(function (key) {
+        return obj[key];
+      });
+    },
+
+    getArrayFromCollection: function (collection) {
+      return Array.prototype.slice.call(collection);
+    },
+
+    getLuhnResult: function (text) {
+      text = '' + text;
+      var result = text.replace(' ', '').split('').map(function (item, i) {
+        return ((i + 1) % 2 === 0) ? parseInt(item, 10) : parseInt(item, 10) * 2;
+      }).reduce(function (sum, current) {
+        return sum + ((current >= 10) ? (current - 9) : current);
+      }, 0);
+      return ((result % 10) === 0);
     }
+
   };
 })();

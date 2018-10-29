@@ -10,7 +10,9 @@
   var tagMain = document.querySelector('main');
   var formFilter = window.dom.getElementBySelector(tagMain, '.catalog__sidebar > form');
   var rangeFilter = window.dom.getElementBySelector(formFilter, '.range__filter');
-  var formBuy = window.dom.getElementBySelector(tagMain, '.buy > form');
+  var formPaymentDeliver = window.dom.getElementBySelector(tagMain, '.buy > form');
+  var deliverContainer = window.dom.getElementBySelector(tagMain, '.deliver');
+  var paymentContainer = window.dom.getElementBySelector(tagMain, '.payment');
 
   var links = {
     catalogContainer: document.querySelector('.catalog__cards'),
@@ -18,10 +20,15 @@
     basketContainer: document.querySelector('.goods__cards'),
     basketCardTemplate: window.dom.getTemplateContent('#card-order', '.goods_card'),
     basketMainHeader: document.querySelector('.main-header__basket'),
-    deliverContainer: window.dom.getElementBySelector(tagMain, '.deliver'),
-    deliverButtons: window.dom.getElementBySelector(tagMain, '.deliver__toggle'),
-    paymentContainer: window.dom.getElementBySelector(tagMain, '.payment'),
-    paymentButtons: window.dom.getElementBySelector(tagMain, '.payment__method'),
+    formPaymentDeliver: formPaymentDeliver,
+    formPaymentDeliverInputs: formPaymentDeliver.querySelectorAll('input, textarea'),
+    paymentContainer: paymentContainer,
+    paymentButtons: window.dom.getElementBySelector(paymentContainer, '.payment__method'),
+    paymentCardStatus: window.dom.getElementBySelector(paymentContainer, '.payment__card-status'),
+    deliverContainer: deliverContainer,
+    deliverButtons: window.dom.getElementBySelector(deliverContainer, '.deliver__toggle'),
+    deliverMap: window.dom.getElementBySelector(deliverContainer, '.deliver__store-map-img'),
+    deliverMapDescription: window.dom.getElementBySelector(deliverContainer, '.deliver__store-describe'),
     rangeFilter: rangeFilter,
     rangeLine: window.dom.getElementBySelector(rangeFilter, '.range__fill-line'),
     rangePinA: window.dom.getElementBySelector(rangeFilter, '.range__btn--left'),
@@ -33,20 +40,21 @@
     formFilterInputs: formFilter.querySelectorAll('input'),
     formFilterPTag: window.dom.getElementBySelector(formFilter, '.range__price-count'),
     emptyFiltersTemplate: window.dom.getTemplateContent('#empty-filters', '.catalog__empty-filter'),
-    formBuyInputs: formBuy.querySelectorAll('input'),
-    goodsTotal: window.dom.getElementBySelector(formBuy, '.goods__total'),
-    goodsTotalCount: window.dom.getElementBySelector(formBuy, '.goods__total-count'),
-    goodsTotalPrice: window.dom.getElementBySelector(formBuy, '.goods__price'),
-    goodsTotalAmount: window.dom.getElementBySelector(formBuy, '.goods__amount')
+    goodsTotal: window.dom.getElementBySelector(formPaymentDeliver, '.goods__total'),
+    goodsTotalCount: window.dom.getElementBySelector(formPaymentDeliver, '.goods__total-count'),
+    goodsTotalPrice: window.dom.getElementBySelector(formPaymentDeliver, '.goods__price'),
+    goodsTotalAmount: window.dom.getElementBySelector(formPaymentDeliver, '.goods__amount')
   };
 
   tagMain = null;
   rangeFilter = null;
   formFilter = null;
-  formBuy = null;
+  formPaymentDeliver = null;
+  deliverContainer = null;
+  paymentContainer = null;
 
   if (window.main) {
     window.main.initApp(links);
-  };
+  }
 
 })();

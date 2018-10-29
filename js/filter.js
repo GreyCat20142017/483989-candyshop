@@ -6,12 +6,12 @@
   var maxValue = 0;
   var FILTERS = ['food-type', 'food-property', 'mark'];
 
+  var bus = window.mediator.bus;
+  var events = window.candyevents;
 
   var getFilterPositionByType = function (currentFilter, type) {
-    return Object.keys(currentFilter).map(function (key) {
-      return key;
-    }).filter(function (item) {
-      return currentFilter[item].filterType === type
+    return window.common.getKeysArrayFromObject(currentFilter).filter(function (item) {
+      return (currentFilter[item].filterType === type);
     });
   };
 
@@ -23,7 +23,7 @@
         break;
       case 'food-property':
         var propertyName = descriptionItem.replace('-free', '');
-        description.amount += + ((propertyName == descriptionItem) ? card.nutritionFacts[propertyName] : !card.nutritionFacts[propertyName]);
+        description.amount += +((propertyName === descriptionItem) ? card.nutritionFacts[propertyName] : !card.nutritionFacts[propertyName]);
         break;
       case 'mark':
         if (descriptionItem === 'availability') {
@@ -44,32 +44,37 @@
 
   var fillAmountByCategory = function (cards, descriptions) {
     cards.forEach(function (card) {
-      Object.keys(descriptions).map(function (key) {
-        return key;
-      }).forEach(function(descriptionItem) {
+      window.common.getKeysArrayFromObject(descriptions).forEach(function (descriptionItem) {
         setFilterAmountByCard(descriptions, descriptionItem, card);
       });
       maxValue = (card.price >= maxValue) ? card.price : maxValue;
-    })
-    Object.keys(descriptions).map(function (key) {
-      return key;
-    }).forEach(function(item) {
+    });
+    window.common.getKeysArrayFromObject(descriptions).forEach(function (item) {
       var element = descriptions[item].contentDom;
       if (element) {
-        element.textContent =  '(' + descriptions[item].amount + ')';
+        element.textContent = '(' + descriptions[item].amount + ')';
       }
     });
     return descriptions;
   };
 
+
   var init = function (links, catalogCards, callback) {
 
+    var onSliderChange = function (data) {
+      if (links.rangePriceMin && links.rangePriceMax) {
+        links.rangePriceMin.textContent = Math.floor(Math.min(data.firstValue, data.secondValue));
+        links.rangePriceMax.textContent = Math.floor(Math.max(data.firstValue, data.secondValue));
+      }
+    };
+
     var prepareFilter = function () {
+      bus.addEvent(events.CHANGE_PRICE, onSliderChange);
       fillAmountByCategory(catalogCards, filterDescription);
       setFilterInteractivity();
     };
 
-    var switchFilterInteractivity = function (action, pinInteractivity) {
+    var switchFilterInteractivity = function (action) {
       if (links.formFilter) {
         links.formFilter[action]('change', onFormChange);
       }
@@ -79,14 +84,11 @@
       switchFilterInteractivity('addEventListener');
     };
 
-    var removeFilterInteractivity = function () {
-      switchFilterInteractivity('removeEventListener');
-    };
 
     var onFormChange = function (evt) {
       var element = evt.target;
       if (element.tagName === 'INPUT') {
-        if (FILTERS.indexOf(element.name) >=0 ) {
+        if (FILTERS.indexOf(element.name) >= 0) {
           callback(element.name, element.value, element.checked);
         }
       }
@@ -94,9 +96,7 @@
 
     var createMapNameToValue = function () {
       var temporaryObject = {};
-      Object.keys(filterDescription).map(function (key) {
-        return key;
-      }).forEach(function(item) {
+      window.common.getKeysArrayFromObject(filterDescription).forEach(function (item) {
         temporaryObject[filterDescription[item].name] = item;
       });
       return temporaryObject;
@@ -105,7 +105,7 @@
     var generateFilterDescription = function () {
       var temporaryObject = {};
       if (links.formFilterInputs) {
-        Array.prototype.slice.call(links.formFilterInputs).forEach(function(element) {
+        Array.prototype.slice.call(links.formFilterInputs).forEach(function (element) {
           var label = element.nextElementSibling;
           temporaryObject[element.value.toString()] = {name: label.textContent, amount: 0, filterType: element.name, state: element.checked,
             contentDom: label.nextElementSibling, basicDom: element, keyProperty: element.value.toString()

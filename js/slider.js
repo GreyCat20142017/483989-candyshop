@@ -1,6 +1,7 @@
 'use strict';
 
 (function () {
+
   var bus = window.mediator.bus;
   var events = window.candyevents;
 
@@ -20,12 +21,11 @@
         var newX = moveUpEvt.pageX - shiftX - sliderX;
         var rangeWidth = links.rangeFilter.offsetWidth;
         var rangeLeft = window.dom.getXCoordinate(links.rangeFilter);
-        var sliderValue = getLimitedValue(newX, 0, rangeWidth) / rangeWidth * 100;
+        var sliderValue = Math.floor(getLimitedValue(newX, 0, rangeWidth) / rangeWidth * 100);
 
         currentPin.style.left = sliderValue + '%';
         var pinALeft = 100 * (window.dom.getXCoordinate(links.rangePinA) - rangeLeft) / rangeWidth;
         var pinBLeft = 100 * (window.dom.getXCoordinate(links.rangePinB) - rangeLeft) / rangeWidth;
-
         if (pinALeft > pinBLeft) {
           links.rangeLine.style.left = pinBLeft + '%';
           links.rangeLine.style.right = (100 - pinALeft) + '%';
@@ -33,11 +33,10 @@
           links.rangeLine.style.left = pinALeft + '%';
           links.rangeLine.style.right = (100 - pinBLeft) + '%';
         }
-        // if (links.rangePriceMin && links.rangePriceMax) {
-        //   links.rangePriceMin.textContent = Math.floor(Math.min(pinALeft, pinBLeft));
-        //   links.rangePriceMax.textContent = Math.floor(Math.max(pinALeft, pinBLeft));
-        // }
-        bus.emitEvent(events.CHANGE_PRICE, {pinALeft: pinALeft, pinBLeft: pinBLeft});
+
+        bus.emitEvent(events.CHANGE_PRICE, {
+          firstValue: parseInt(getComputedStyle(links.rangePinA).left, 10),
+          secondValue: parseInt(getComputedStyle(links.rangePinB).left, 10)});
       };
 
       var onPinMouseUp = function (upEvt) {

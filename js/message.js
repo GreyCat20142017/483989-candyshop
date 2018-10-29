@@ -2,19 +2,25 @@
 
 (function () {
 
-  var init = function (messageLink, messageTitle) {
+  var init = function (messageLink, messageTitle, previousObject) {
 
     var showMessage = function () {
       setMessageInteractivity();
-      window.general.removeClassName(messageLink, 'modal--hidden');
+      window.dom.removeClassName(messageLink, 'modal--hidden');
       if (button) {
-        window.general.setFocusOnObject(button);
+        window.dom.setFocusOnObject(button);
+        button.tabIndex = window.general.getIncreasedTabIndex();
       }
     };
 
     var hideMessage = function () {
       removeMessageInteractivity();
       window.dom.addClassName(messageLink, 'modal--hidden');
+      if (button) {
+        window.dom.setFocusOnObject(button);
+        button.tabIndex = window.general.getDefaultTabIndex();
+      }
+      window.dom.setFocusOnObject(previousObject);
     };
 
     var onDocumentKeyDown = function (evt) {
@@ -41,7 +47,7 @@
       if (button) {
         button[action]('click', onButtonClick);
         button[action]('keydown', onSingleButtonTabKeyDown);
-      };
+      }
     };
 
     var setMessageInteractivity = function () {
@@ -63,7 +69,7 @@
     var button = messageLink.querySelector('button');
     if (messageTitle) {
       setMessageTitle(messageTitle);
-    };
+    }
     showMessage();
 
   };

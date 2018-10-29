@@ -24,7 +24,7 @@
       <h2 class="visually-hidden">Каталог товаров</h2>
 
       <aside class="catalog__sidebar">
-        <form action="/">
+        <form action="">
 
           <ul class="catalog__filter">
             <li class="input-btn">
@@ -144,7 +144,7 @@
     <section class="buy">
       <h2 class="visually-hidden">Оформление покупки</h2>
 
-      <form action="/" method="post">
+      <form action="" method="post">
         <section class="goods">
           <div class="goods__wrap container">
             <h2 class="group-title goods__title" id="basket">Твои покупки</h2>
@@ -215,24 +215,28 @@
                 <div class="payment__inputs">
                   <div class="payment__card-group">
                     <p class="text-input text-input--light payment__input-wrap payment__input-wrap--card-number">
-                      <input type="text" class="text-input__input" name="card-number" id="payment__card-number" placeholder="Номер карты">
-                      <label class="text-input__label" for="payment__card-number">Номер карты</label>
+                      <input type="text" class="text-input__input" name="card-number" id="payment__card-number"
+                        placeholder="Номер карты" pattern="[0-9]{16}" minlength="16" maxlength="16" required>
+                      <label class="text-input__label" for="payment__card-number">Номер карты (анти-Луна)</label>
                     </p>
 
                     <p class="text-input text-input--light payment__input-wrap payment__input-wrap--card-date">
-                      <input type="text" class="text-input__input" name="card-date" id="payment__card-date" placeholder="мм/гг">
+                      <input type="text" class="text-input__input" name="card-date" id="payment__card-date" placeholder="мм/гг"
+                       pattern="((0[1-9]|1[0-2])\/(1[8-9]|2[0-9]))" minlength="5" maxlength="5" required>
                       <label class="text-input__label" for="payment__card-date">мм/гг</label>
                     </p>
 
                     <p class="text-input text-input--light payment__input-wrap payment__input-wrap--cvc">
-                      <input type="text" class="text-input__input" name="card-cvc" id="payment__card-cvc" placeholder="CVC">
+                      <input type="text" class="text-input__input" name="card-cvc" id="payment__card-cvc" placeholder="CVC"
+                        pattern="[0-9]{3}"  minlength="3" maxlength="3" required>
                       <label class="text-input__label text-input__label--lock" for="payment__card-cvc">CVC</label>
                     </p>
 
                   </div>
                   <div class="payment__cardholder-group">
                     <p class="text-input text-input--light payment__input-wrap payment__input-wrap--cardholder">
-                      <input type="text" class="text-input__input" name="cardholder" id="payment__cardholder" placeholder="ИМЯ ДЕРЖАТЕЛЯ">
+                      <input type="text" class="text-input__input" name="cardholder" id="payment__cardholder" placeholder="ИМЯ ДЕРЖАТЕЛЯ"
+                       pattern="[A-Z, ]{2,}" required>
                       <label class="text-input__label" for="payment__cardholder">ИМЯ ДЕРЖАТЕЛЯ</label>
                     </p>
 
@@ -244,8 +248,8 @@
                   </div>
                 </div>
                 <div class="describe">
-                  <p class="describe__text"><b>Мы не гарантируем безопасность твоих данных.</b></p>
-                  <p class="describe__text">Все данные банковской карты вводи не так, как написано на карте.</p>
+                  <p class="describe__text"><b>Мы НЕ гарантируем безопасность твоих данных.</b></p>
+                  <p class="describe__text">Все данные банковской карты вводи НЕ ТАК, как написано на карте.</p>
                   <p class="describe__text">Не волнуйся, наша система поможет с заполнением.</p>
                   <p class="describe__text">После заполнения всех полей, система проверит функционирование карты и можно переходить к доставке.</p>
                 </div>
@@ -337,22 +341,22 @@
 
                 <ul class="deliver__address-entry-fields">
                   <li class="text-input deliver__street">
-                    <input type="text" class="text-input__input" name="deliver-street" id="deliver__street" placeholder="Улица">
+                    <input type="text" class="text-input__input" name="deliver-street" id="deliver__street" placeholder="Улица" required>
                     <label class="text-input__label" for="deliver__street">Улица</label>
                   </li>
 
                   <li class="text-input deliver__house">
-                    <input type="text" class="text-input__input" name="deliver-house" id="deliver__house" placeholder="Дом">
+                    <input type="text" class="text-input__input" name="deliver-house" id="deliver__house" placeholder="Дом" required>
                     <label class="text-input__label" for="deliver__house">Дом</label>
                   </li>
 
                   <li class="text-input deliver__floor">
-                    <input type="text" class="text-input__input" name="deliver-floor" id="deliver__floor" placeholder="Эт.">
+                    <input type="text" class="text-input__input" name="deliver-floor" id="deliver__floor" placeholder="Эт." pattern="\d{0,2}">
                     <label class="text-input__label" for="deliver__floor">Эт.</label>
                   </li>
 
                   <li class="text-input deliver__room">
-                    <input type="text" class="text-input__input" name="deliver-room" id="deliver__room" placeholder="Кв.">
+                    <input type="text" class="text-input__input" name="deliver-room" id="deliver__room" placeholder="Кв." required>
                     <label class="text-input__label" for="deliver__room">Кв.</label>
                   </li>
                 </ul>
@@ -492,9 +496,13 @@
 
   <script src="js/message.js"></script>
   <script src="js/backend.js"></script>
+
   <script src="js/slider.js"></script>
   <script src="js/filter.js"></script>
+  <script src="js/catalog.js"></script>
+  <script src="js/basket.js"></script>
   <script src="js/order.js"></script>
+
   <script src="js/main.js"></script>
   <script src="js/candyshop.js"></script>
 
