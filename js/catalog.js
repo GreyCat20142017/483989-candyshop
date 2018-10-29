@@ -13,7 +13,7 @@
   var bus = window.mediator.bus;
   var events = window.candyevents;
 
-  var init = function (links, catalogCards) {
+  var init = function (links) {
 
     var getClassNameByAmount = function (amount) {
       if (amount > CARD_CLASSES_UPPER_BORDER) {
@@ -34,13 +34,6 @@
       return ((ind >= 0) && (ind < STAR_CLASSES.length)) ? CHARACTERISTICS[ind] : '';
     };
 
-    var changeFirstNumericDataWithoutOwnTag = function (element, selector, value) {
-      var block = element.querySelector(selector);
-      if (block) {
-        block.innerHTML = block.innerHTML.replace(/\d*\s/, parseInt('' + value, 10));
-      }
-    };
-
     var createCatalogCard = function (template, data) {
       var element = template.cloneNode(true);
       var header = element.querySelector('.card__header');
@@ -48,7 +41,7 @@
       window.dom.setAttributeBySelector(header, '.card__title', 'textContent', data.name);
       window.dom.setAttributeBySelector(header, 'img', 'src', IMG_PATH + data.picture);
       window.dom.setAttributeBySelector(header, 'img', 'alt', data.name);
-      changeFirstNumericDataWithoutOwnTag(element, '.card__price', data.price);
+      window.dom.changeFirstNumericDataWithoutOwnTag(element, '.card__price', data.price);
       window.dom.setAttributeBySelector(element, '.card__weight', 'textContent', data.weight);
       window.dom.setAttributeBySelector(element, '.star__count', 'textContent', data.rating.number);
       window.dom.setAttributeBySelector(element, '.card__characteristic', 'textContent', getCharacteristicText(data.nutritionFacts.sugar));
@@ -73,23 +66,6 @@
       window.dom.addClassNameBySelector(insertionPoint, '.catalog__load', 'visually-hidden');
     };
 
-    var renderCatalogByFilter = function (filterName, filterValue, filterState) {
-      setFilterState(filterName, filterValue, filterState);
-      var checkedFilters = getCheckedFilters();
-      if (checkedFilters.length === 0) {
-        renderCatalog(catalogCards, links.catalogCardTemplate, links.catalogContainer);
-      } else {
-        var filteredCatalogCards = catalogCards.filter(function(card) {
-          return getMatchResult(card, checkedFilters);
-        });
-        if (filteredCatalogCards.length === 0) {
-          renderMessage(links.emptyFiltersTemplate, links.catalogContainer);
-        } else {
-          renderCatalog(filteredCatalogCards, links.catalogCardTemplate, links.catalogContainer);
-        }
-      };
-    };
-
     var renderCatalogMessage = function (template, insertionPoint) {
       if (template && insertionPoint) {
         insertionPoint.innerHTML = '';
@@ -97,6 +73,10 @@
       }
       window.dom.removeClassName(insertionPoint, '.catalog__cards--load');
       window.dom.addClassNameBySelector(insertionPoint, '.catalog__load', 'visually-hidden');
+    };
+
+    var showComposition = function (cardID) {
+
     };
 
     var onCatalogClick = function (evt) {
@@ -112,7 +92,7 @@
           return false;
         }
         if (element.classList.contains('card__btn') && element.parentElement.hasAttribute(CARD_ID)) {
-          addUnitToBasket(element.parentElement.getAttribute(CARD_ID));
+          moveUnitToBasket(element.parentElement.getAttribute(CARD_ID));
           return false;
         }
         if (element.classList.contains('card__btn-composition') && element.parentElement.hasAttribute(CARD_ID)) {
@@ -136,77 +116,33 @@
       catalogCards[catalogIndex].selected = !(catalogCards[catalogIndex].selected);
     };
 
-    var addUnitToBasket = function (cardID) {
-      var target = {};
-      var sourceIndex = window.common.getIndexByID(catalogCards, cardID);
-      var targetIndex = window.common.getIndexByID(basketCards, cardID);
-      if (sourceIndex >= 0) {
-        var source = catalogCards[sourceIndex];
+    var moveUnitToBasket = function (cardID) {
+      var catalogIndex = window.common.getIndexByID(catalogCards, cardID);
+      if (catalogIndex >= 0) {
+        var source = catalogCards[catalogIndex];
         if (source.amount > 0) {
-          if (targetIndex >= 0) {
-            target = basketCards[targetIndex];
-            target.amount = (target.amount) ? (target.amount + 1) : 1;
-            var itemSelector = '.goods_card[data-id="' + cardID + '"] .card-order__count';
-            window.dom.setAttributeBySelector(links.basketContainer, itemSelector, 'value', target.amount);
-          } else {
-            target = Object.assign({}, source);
-            target.amount = 1;
-            basketCards.push(target);
-            renderBasket([target], links.basketCardTemplate, links.basketContainer);
-          }
-          refreshBasketState(basketCards);
           source.amount = source.amount - 1;
           checkCatalogAmount(source, cardID, false);
+          bus.emitEvent(events.ADD_TO_BASKET, {cardID: cardID, amount: 1, source: source});
         }
       }
     };
 
-    var removeUnitFromBasket = function (cardID, element, basketAmount) {
-      var basketIndex = window.common.getIndexByID(basketCards, cardID);
-      var catalogIndex = window.common.getIndexByID(catalogCards, cardID);
-      if ((basketIndex >= 0) && (catalogIndex >= 0)) {
-        var source = basketCards[basketIndex];
-        if (source.amount > 0) {
-          basketAmount = basketAmount ? basketAmount : source.amount;
-          var target = catalogCards[catalogIndex];
-          target.amount = target.amount + basketAmount;
-          checkCatalogAmount(target, cardID, (Math.abs(basketAmount) === 1) ? false : true);
-          source.amount = source.amount - basketAmount;
-          window.dom.setAttributeBySelector(element, '.card-order__count', 'value', source.amount);
-          if (source.amount === 0) {
-            element.remove();
-            basketCards.splice(basketIndex, 1);
-          }
-        }
-        refreshBasketState(basketCards);
-      }
-    };
-
-
-    var initCatalog = function () {
-
-      // bus.addEvent(events.RETURN_CARD, onSliderChange);
-      if (links.catalogContainer) {
-        links.catalogContainer.addEventListener('click', onCatalogClick);
-      }
-
-      if (window.backend) {
-        window.backend.getData(onGetData, onGetDataError);
-      }
-      if (window.slider) {
-        window.slider.init(links);
-      }
-      if (window.filter) {
-        window.filter.init(links, catalogCards);
+    var moveUnitFromBasket = function (data) {
+      var catalogIndex = window.common.getIndexByID(catalogCards, data.cardID);
+      if (catalogIndex >= 0) {
+        var target = catalogCards[catalogIndex];
+        target.amount = target.amount + data.amount;
+        checkCatalogAmount(target, data.cardID, (Math.abs(data.amount) === 1) ? false : true);
       }
     };
 
     var unsetContradictoryFilter = function (filterTypes) {
-      filterTypes.forEach(function(filterType) {
+      filterTypes.forEach(function (filterType) {
         currentFilterByCategories[filterType] = [];
         Object.keys(currentFilter).map(function (key) {
           return key;
-        }).forEach(function(item) {
+        }).forEach(function (item) {
           if (currentFilter[item].filterType === filterType) {
             currentFilter[item].state = false;
             currentFilter[item].basicDom.checked = false;
@@ -229,11 +165,11 @@
       var filterType = currentFilter[filterValue].filterType;
       currentFilter[filterValue].state = filterState;
       if (filterState) {
-         unsetContradictoryFilter((filterType === 'mark')  ? ['food-type', 'food-property'] :  ['mark']);
-         setThisFilter(filterType, filterValue);
+        unsetContradictoryFilter((filterType === 'mark') ? ['food-type', 'food-property'] : ['mark']);
+        setThisFilter(filterType, filterValue);
       } else {
-         unsetThisFilter(filterType, filterValue);
-      };
+        unsetThisFilter(filterType, filterValue);
+      }
     };
 
     var getCheckedFilters = function () {
@@ -252,7 +188,7 @@
           break;
         case 'food-property':
           var propertyName = filterElement.keyProperty.replace('-free', '');
-          matchResult = ((propertyName == filterElement.keyProperty) ? card.nutritionFacts[propertyName] : !card.nutritionFacts[propertyName]);
+          matchResult = ((propertyName === filterElement.keyProperty) ? card.nutritionFacts[propertyName] : !card.nutritionFacts[propertyName]);
           break;
         case 'mark':
           if (filterElement.keyProperty === 'availability') {
@@ -269,12 +205,12 @@
     };
 
     var getMatchResult = function (card, checkedFilters) {
-     var result = {'food-type': false, 'food-property': false, 'mark': false};
-     for (var i = 0; i < checkedFilters.length; i++) {
-       result[checkedFilters[i].filterType] = result[checkedFilters[i].filterType] || isMatch(checkedFilters[i], card);
-      };
+      var result = {'food-type': false, 'food-property': false, 'mark': false};
+      for (var i = 0; i < checkedFilters.length; i++) {
+        result[checkedFilters[i].filterType] = result[checkedFilters[i].filterType] || isMatch(checkedFilters[i], card);
+      }
       return (currentFilterByCategories['mark'].length === 0) ? ((result['food-type'] || currentFilterByCategories['food-type'].length === 0) &&
-              (result['food-property'] || currentFilterByCategories['food-property'].length === 0)) : result['mark'];
+        (result['food-property'] || currentFilterByCategories['food-property'].length === 0)) : result['mark'];
     };
 
     var renderCatalogByFilter = function (filterName, filterValue, filterState) {
@@ -283,15 +219,15 @@
       if (checkedFilters.length === 0) {
         renderCatalog(catalogCards, links.catalogCardTemplate, links.catalogContainer);
       } else {
-        var filteredCatalogCards = catalogCards.filter(function(card) {
+        var filteredCatalogCards = catalogCards.filter(function (card) {
           return getMatchResult(card, checkedFilters);
         });
         if (filteredCatalogCards.length === 0) {
-          renderMessage(links.emptyFiltersTemplate, links.catalogContainer);
+          renderCatalogMessage(links.emptyFiltersTemplate, links.catalogContainer);
         } else {
           renderCatalog(filteredCatalogCards, links.catalogCardTemplate, links.catalogContainer);
         }
-      };
+      }
     };
 
     var onGetData = function (response) {
@@ -313,9 +249,26 @@
       window.message.init(links.messages.errorMessage, errorMessage, document.activeElement);
     };
 
+    var initCatalog = function () {
+      if (links.catalogContainer) {
+        bus.addEvent(events.ADD_FROM_BASKET, moveUnitFromBasket);
+        bus.addEvent(events.REQUEST_TO_BASKET, moveUnitToBasket);
+        links.catalogContainer.addEventListener('click', onCatalogClick);
+      }
+
+      if (window.backend) {
+        window.backend.getData(onGetData, onGetDataError);
+      }
+      if (window.slider) {
+        window.slider.init(links);
+      }
+      if (window.filter) {
+        window.filter.init(links, catalogCards);
+      }
+    };
 
     var catalogCards = [];
-    var basketCards = []; //temporary
+    // var basketCards = []; //temporary
     var currentFilter = {};
     var currentFilterByCategories = {'food-type': [], 'food-property': [], 'mark': [], 'price': {minPrice: 0, maxPrice: 0}};
 
@@ -325,7 +278,7 @@
 
   window.catalog = {
     init: init
-  }
+  };
 
 })();
 

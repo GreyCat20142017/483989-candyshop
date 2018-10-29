@@ -96,6 +96,13 @@
       return false;
     },
 
+    changeFirstNumericDataWithoutOwnTag: function (element, selector, value) {
+      var block = element.querySelector(selector);
+      if (block) {
+        block.innerHTML = block.innerHTML.replace(/\d*\s/, parseInt('' + value, 10));
+      }
+    },
+
     addClassName: addClassName,
     removeClassName: removeClassName,
     setFocusOnObject: setFocusOnObject
