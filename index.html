@@ -24,12 +24,12 @@
       <h2 class="visually-hidden">Каталог товаров</h2>
 
       <aside class="catalog__sidebar">
-        <form action="/">
+        <form action="">
 
           <ul class="catalog__filter">
             <li class="input-btn">
               <input class="input-btn__input visually-hidden input-btn__input--checkbox" name="food-type" value="icecream" type="checkbox" id="filter-icecream" >
-              <label class="input-btn__label input-btn__label--checkbox" for="filter-icecream">Мороженное</label>
+              <label class="input-btn__label input-btn__label--checkbox" for="filter-icecream">Мороженое</label>
               <span class="input-btn__item-count">(7)</span>
             </li>
 
@@ -144,7 +144,7 @@
     <section class="buy">
       <h2 class="visually-hidden">Оформление покупки</h2>
 
-      <form action="/" method="post">
+      <form action="" method="post">
         <section class="goods">
           <div class="goods__wrap container">
             <h2 class="group-title goods__title" id="basket">Твои покупки</h2>
@@ -157,7 +157,7 @@
                 </div>
               </div>
               <div class="goods__total visually-hidden">
-                <p class="goods__total-count">Итого за 0 товаров: <span class="goods__price">0 ₽</span></p>
+                <p class="goods__total-count">Итого за&nbsp;<span class="goods__amount">0 товаров</span>: <span class="goods__price">0 ₽</span></p>
                 <a href="#order" class="goods__order-link goods__order-link--disabled">Оформляем</a>
               </div>
             </div>
@@ -175,27 +175,27 @@
 
               <ul class="contact-data__inputs">
                 <li class="text-input contact-data__input-wrap">
-                  <input type="text" class="text-input__input" name="name" id="contact-data__name" placeholder="Имя">
+                  <input type="text" class="text-input__input" name="name" id="contact-data__name" placeholder="Имя" required>
                   <label for="contact-data__name" class="text-input__label">Имя</label>
                 </li>
 
                 <li class="text-input contact-data__input-wrap">
-                  <input type="text" class="text-input__input" name="tel" id="contact-data__tel" placeholder="Телефон">
+                  <input type="text" class="text-input__input" name="tel" id="contact-data__tel" placeholder="Телефон" required>
                   <label for="contact-data__tel" class="text-input__label">Телефон</label>
                 </li>
 
                 <li class="text-input contact-data__input-wrap">
-                  <input type="text" class="text-input__input" name="email" id="contact-data__email" placeholder="Почта">
+                  <input type="email" class="text-input__input" name="email" id="contact-data__email" placeholder="Почта">
                   <label for="contact-data__email" class="text-input__label">Почта</label>
                 </li>
 
               </ul>
               <div class="describe">
-                <p class="describe__text">Привет наш единомышленник по вкусам.</p>
-                <p class="describe__text">Смело заполняй поле с телефоном — не будем надоедать сообщениями. Обещаем ;)</p>
+                <p class="describe__text">Привет, наш единомышленник по вкусам.</p>
+                <p class="describe__text">Смело заполняй поле с телефоном — не будем надоедать сообщениями. Обещаем :-)</p>
                 <p class="describe__text">Написать почту оставляем на твоё усмотрение,
-                  но мы очень стараемся над рассылкой и будем рады если заценишь. :D Посмотришь? Тогда давай почту! </p>
-                <p class="describe__text">Как закончишь оформление, тебе позвонит наш дружелюбный менеджер для уточнения деталей.</p>
+                  но мы очень стараемся над рассылкой и будем рады если заценишь. :-) Посмотришь? Тогда давай почту! </p>
+                <p class="describe__text">Как закончишь оформление, тебе позвонит наш недружелюбный менеджер для уточнения деталей.</p>
               </div>
             </div>
           </section>
@@ -215,24 +215,28 @@
                 <div class="payment__inputs">
                   <div class="payment__card-group">
                     <p class="text-input text-input--light payment__input-wrap payment__input-wrap--card-number">
-                      <input type="text" class="text-input__input" name="card-number" id="payment__card-number" placeholder="Номер карты">
-                      <label class="text-input__label" for="payment__card-number">Номер карты</label>
+                      <input type="text" class="text-input__input" name="card-number" id="payment__card-number"
+                        placeholder="Номер карты" pattern="[0-9]{16}" minlength="16" maxlength="16" required>
+                      <label class="text-input__label" for="payment__card-number">Номер карты (анти-Луна)</label>
                     </p>
 
                     <p class="text-input text-input--light payment__input-wrap payment__input-wrap--card-date">
-                      <input type="text" class="text-input__input" name="card-date" id="payment__card-date" placeholder="мм/гг">
+                      <input type="text" class="text-input__input" name="card-date" id="payment__card-date" placeholder="мм/гг"
+                       pattern="((0[1-9]|1[0-2])\/(1[8-9]|2[0-9]))" minlength="5" maxlength="5" required>
                       <label class="text-input__label" for="payment__card-date">мм/гг</label>
                     </p>
 
                     <p class="text-input text-input--light payment__input-wrap payment__input-wrap--cvc">
-                      <input type="text" class="text-input__input" name="card-cvc" id="payment__card-cvc" placeholder="CVC">
+                      <input type="text" class="text-input__input" name="card-cvc" id="payment__card-cvc" placeholder="CVC"
+                        pattern="[0-9]{3}"  minlength="3" maxlength="3" required>
                       <label class="text-input__label text-input__label--lock" for="payment__card-cvc">CVC</label>
                     </p>
 
                   </div>
                   <div class="payment__cardholder-group">
                     <p class="text-input text-input--light payment__input-wrap payment__input-wrap--cardholder">
-                      <input type="text" class="text-input__input" name="cardholder" id="payment__cardholder" placeholder="ИМЯ ДЕРЖАТЕЛЯ">
+                      <input type="text" class="text-input__input" name="cardholder" id="payment__cardholder" placeholder="ИМЯ ДЕРЖАТЕЛЯ"
+                       pattern="[A-Z, ]{2,}" required>
                       <label class="text-input__label" for="payment__cardholder">ИМЯ ДЕРЖАТЕЛЯ</label>
                     </p>
 
@@ -244,9 +248,9 @@
                   </div>
                 </div>
                 <div class="describe">
-                  <p class="describe__text"><b>Мы гарантируем безопасностной твоих данных.</b></p>
-                  <p class="describe__text">Все данные банковской карты вводи точно как написано на карте.</p>
-                  <p class="describe__text">Не волнуйся, наша система поможет с заполеннием.</p>
+                  <p class="describe__text"><b>Мы НЕ гарантируем безопасность твоих данных.</b></p>
+                  <p class="describe__text">Все данные банковской карты вводи НЕ ТАК, как написано на карте.</p>
+                  <p class="describe__text">Не волнуйся, наша система поможет с заполнением.</p>
                   <p class="describe__text">После заполнения всех полей, система проверит функционирование карты и можно переходить к доставке.</p>
                 </div>
               </div>
@@ -337,22 +341,22 @@
 
                 <ul class="deliver__address-entry-fields">
                   <li class="text-input deliver__street">
-                    <input type="text" class="text-input__input" name="deliver-street" id="deliver__street" placeholder="Улица">
+                    <input type="text" class="text-input__input" name="deliver-street" id="deliver__street" placeholder="Улица" required>
                     <label class="text-input__label" for="deliver__street">Улица</label>
                   </li>
 
                   <li class="text-input deliver__house">
-                    <input type="text" class="text-input__input" name="deliver-house" id="deliver__house" placeholder="Дом">
+                    <input type="text" class="text-input__input" name="deliver-house" id="deliver__house" placeholder="Дом" required>
                     <label class="text-input__label" for="deliver__house">Дом</label>
                   </li>
 
                   <li class="text-input deliver__floor">
-                    <input type="text" class="text-input__input" name="deliver-floor" id="deliver__floor" placeholder="Эт.">
+                    <input type="text" class="text-input__input" name="deliver-floor" id="deliver__floor" placeholder="Эт." pattern="\d{0,2}">
                     <label class="text-input__label" for="deliver__floor">Эт.</label>
                   </li>
 
                   <li class="text-input deliver__room">
-                    <input type="text" class="text-input__input" name="deliver-room" id="deliver__room" placeholder="Кв.">
+                    <input type="text" class="text-input__input" name="deliver-room" id="deliver__room" placeholder="Кв." required>
                     <label class="text-input__label" for="deliver__room">Кв.</label>
                   </li>
                 </ul>
@@ -421,7 +425,7 @@
     <article class="catalog__card card card--in-stock">
       <header class="card__header">
         <h3 class="card__title">Чесночные сливки</h3>
-        <img class="card__img" src="img/cards/ice-garlic.jpg" alt="Мороженное со вкусом чеснока" width="265" height="264">
+        <img class="card__img" src="img/cards/ice-garlic.jpg" alt="Мороженое со вкусом чеснока" width="265" height="264">
         <span class="card__price">230 <span class="card__currency">₽</span><span class="card__weight">/ 70 Г</span></span>
       </header>
       <div class="card__main">
@@ -434,7 +438,7 @@
         </div>
         <div class="card__composition card__composition--hidden">
           <p class="card__characteristic">Без сахара. 133 ккал</p>
-          <p class="card__composition-list">Молоко, сливки, вода, арамотизатор бекона, пищевой краситель.</p>
+          <p class="card__composition-list">Молоко, сливки, вода, ароматизатор бекона, пищевой краситель.</p>
         </div>
         <p class="card__btns-wrap">
           <a class="card__btn-favorite" href="#">Добавить в избранное</a>
@@ -482,6 +486,25 @@
       <p>Попробуй ещё раз, нажав <span class="catalog__show-all">«Показать всё»</span> или посмотри что мы предлагаем тебе попробовать.</p>
     </div>
   </template>
+
+  <script src="js/common.js"></script>
+  <script src="js/general.js"></script>
+  <script src="js/dom.js"></script>
+
+  <script src="js/events.js"></script>
+  <script src="js/mediator.js"></script>
+
+  <script src="js/message.js"></script>
+  <script src="js/backend.js"></script>
+
+  <script src="js/slider.js"></script>
+  <script src="js/filter.js"></script>
+  <script src="js/catalog.js"></script>
+  <script src="js/basket.js"></script>
+  <script src="js/order.js"></script>
+
+  <script src="js/main.js"></script>
+  <script src="js/candyshop.js"></script>
 
 </body>
 </html>
