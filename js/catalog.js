@@ -76,12 +76,16 @@
     };
 
     var showComposition = function (cardID) {
-
+      var catalogIndex = window.common.getIndexByID(catalogCards, cardID);
+      if (catalogIndex >= 0) {
+        var composition = catalogCards[catalogIndex].nutritionFacts;
+        console.log(composition);
+      }
     };
 
     var onCatalogClick = function (evt) {
       var element = evt.target;
-      if (element.tagName !== 'A') {
+      if ((element.tagName !== 'A') && (element.tagName !== 'BUTTON')) {
         return false;
       }
       evt.preventDefault();
@@ -95,8 +99,11 @@
           moveUnitToBasket(element.parentElement.getAttribute(CARD_ID));
           return false;
         }
-        if (element.classList.contains('card__btn-composition') && element.parentElement.hasAttribute(CARD_ID)) {
-          showComposition(element.parentElement.getAttribute(CARD_ID));
+        if (element.classList.contains('card__btn-composition')) {
+          var ancestor = element.parentElement.parentElement.parentElement;
+          if (ancestor.hasAttribute(CARD_ID)) {
+            showComposition(ancestor.getAttribute(CARD_ID));
+          }
           return false;
         }
         element = element.parentNode;

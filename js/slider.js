@@ -19,7 +19,7 @@
     var setSliderToMinMax = function () {
       links.rangePinA.style.left = '0%';
       links.rangePinB.style.left = '100%';
-      links.rangeLine.style.left =  '0%';
+      links.rangeLine.style.left = '0%';
       links.rangeLine.style.right = '0%';
     };
 
@@ -41,8 +41,8 @@
         }
 
         bus.emitEvent(events.CHANGE_PRICE, {
-         firstValue: getLimitedValue(parseInt(getComputedStyle(links.rangePinA).left , 10) / rangeWidth * 100, 0 , 100),
-         secondValue: getLimitedValue(parseInt(getComputedStyle(links.rangePinB).left , 10) / rangeWidth * 100, 0 , 100)});
+          firstValue: getLimitedValue(parseInt(getComputedStyle(links.rangePinA).left, 10) / rangeWidth * 100, 0, 100),
+          secondValue: getLimitedValue(parseInt(getComputedStyle(links.rangePinB).left, 10) / rangeWidth * 100, 0, 100)});
       };
 
       var onPinMouseUp = function (upEvt) {
@@ -68,7 +68,7 @@
     if (links.rangeFilter && links.rangeLine && links.rangePinA && links.rangePinB) {
       links.rangePinA.addEventListener('mousedown', onPinMouseDown);
       links.rangePinB.addEventListener('mousedown', onPinMouseDown);
-    };
+    }
     bus.addEvent('FILTER_INIT', setSliderToMinMax);
   };
 

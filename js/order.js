@@ -117,11 +117,7 @@
       if (links.orderLink) {
         var nowDisabled = links.orderLink.classList.contains('goods__order-link--disabled');
         if (buttonDisabled !== nowDisabled) {
-          if (buttonDisabled) {
-            window.dom.addClassName(links.orderLink, 'goods__order-link--disabled');
-          } else {
-            window.dom.removeClassName(links.orderLink, 'goods__order-link--disabled');
-          }
+          window.dom[buttonDisabled ? 'addClassName' : 'removeClassName'](links.orderLink, 'goods__order-link--disabled');
         }
       }
     };
@@ -144,21 +140,15 @@
       window.common.getKeysArrayFromObject(classesObject).forEach(function (item) {
         var element = window.dom.getElementBySelector(container, '.' + classesObject[item]);
         var inputs = element.querySelectorAll('input, textarea');
-        if (element && element.classList.contains(className)) {
-          window.dom.removeClassName(element, 'visually-hidden');
+        if (element) {
+          var result = element.classList.contains(className);
+          window.dom[result ? 'removeClassName' : 'addClassName'](element, 'visually-hidden');
           window.common.getArrayFromCollection(inputs).forEach(function (input) {
-            input.disabled = false;
-          });
-        }
-        if (element && !element.classList.contains(className)) {
-          window.dom.addClassName(element, 'visually-hidden');
-          window.common.getArrayFromCollection(inputs).forEach(function (input) {
-            input.disabled = true;
+            input.disabled = !result;
           });
         }
       });
     };
-
 
     var onOrderClick = function (evt) {
       evt.preventDefault();
