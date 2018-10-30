@@ -16,10 +16,16 @@
       return newValue;
     };
 
+    var setSliderToMinMax = function () {
+      links.rangePinA.style.left = '0%';
+      links.rangePinB.style.left = '100%';
+      links.rangeLine.style.left =  '0%';
+      links.rangeLine.style.right = '0%';
+    };
+
     var onPinMouseDown = function (evt) {
       var refreshSliderState = function (moveUpEvt) {
         var newX = moveUpEvt.pageX - shiftX - sliderX;
-        var rangeWidth = links.rangeFilter.offsetWidth;
         var rangeLeft = window.dom.getXCoordinate(links.rangeFilter);
         var sliderValue = Math.floor(getLimitedValue(newX, 0, rangeWidth) / rangeWidth * 100);
 
@@ -35,8 +41,8 @@
         }
 
         bus.emitEvent(events.CHANGE_PRICE, {
-          firstValue: parseInt(getComputedStyle(links.rangePinA).left, 10),
-          secondValue: parseInt(getComputedStyle(links.rangePinB).left, 10)});
+         firstValue: getLimitedValue(parseInt(getComputedStyle(links.rangePinA).left , 10) / rangeWidth * 100, 0 , 100),
+         secondValue: getLimitedValue(parseInt(getComputedStyle(links.rangePinB).left , 10) / rangeWidth * 100, 0 , 100)});
       };
 
       var onPinMouseUp = function (upEvt) {
@@ -58,11 +64,12 @@
       document.addEventListener('mousemove', onPinMouseMove);
     };
 
-
+    var rangeWidth = links.rangeFilter.offsetWidth;
     if (links.rangeFilter && links.rangeLine && links.rangePinA && links.rangePinB) {
       links.rangePinA.addEventListener('mousedown', onPinMouseDown);
       links.rangePinB.addEventListener('mousedown', onPinMouseDown);
-    }
+    };
+    bus.addEvent('FILTER_INIT', setSliderToMinMax);
   };
 
   window.slider = {

@@ -1,8 +1,7 @@
 'use strict';
 
 (function () {
-  var filterDescription = {};
-  var filterNameToValue = {};
+
   var maxValue = 0;
   var FILTERS = ['food-type', 'food-property', 'mark'];
 
@@ -16,7 +15,7 @@
   };
 
   var setFilterAmountByCard = function (descriptions, descriptionItem, card) {
-    var description = descriptions[descriptionItem];
+    var description = filter.description[descriptionItem];
     switch (description.filterType) {
       case 'food-type':
         description.amount += (description.name === card.kind) ? 1 : 0;
@@ -47,7 +46,6 @@
       window.common.getKeysArrayFromObject(descriptions).forEach(function (descriptionItem) {
         setFilterAmountByCard(descriptions, descriptionItem, card);
       });
-      maxValue = (card.price >= maxValue) ? card.price : maxValue;
     });
     window.common.getKeysArrayFromObject(descriptions).forEach(function (item) {
       var element = descriptions[item].contentDom;
@@ -55,23 +53,20 @@
         element.textContent = '(' + descriptions[item].amount + ')';
       }
     });
-    return descriptions;
+    return descriptions
   };
 
-
-  var init = function (links, catalogCards, callback) {
+  var init = function (links, catalogCards) {
 
     var onSliderChange = function (data) {
       if (links.rangePriceMin && links.rangePriceMax) {
-        links.rangePriceMin.textContent = Math.floor(Math.min(data.firstValue, data.secondValue));
-        links.rangePriceMax.textContent = Math.floor(Math.max(data.firstValue, data.secondValue));
+        console.log()
+        filter.state.price.min = Math.floor(Math.min(data.firstValue, data.secondValue) * filter.state.price.upperBound / 100) ;
+        filter.state.price.max = Math.floor(Math.max(data.firstValue, data.secondValue) * filter.state.price.upperBound / 100);
+        console.log('max '+filter.state.price.max+' '+ filter.state.price.upperBound  +' '+ Math.max(data.firstValue, data.secondValue))
+        links.rangePriceMin.textContent = filter.state.price.min;
+        links.rangePriceMax.textContent = filter.state.price.max;
       }
-    };
-
-    var prepareFilter = function () {
-      bus.addEvent(events.CHANGE_PRICE, onSliderChange);
-      fillAmountByCategory(catalogCards, filterDescription);
-      setFilterInteractivity();
     };
 
     var switchFilterInteractivity = function (action) {
@@ -84,22 +79,30 @@
       switchFilterInteractivity('addEventListener');
     };
 
-
     var onFormChange = function (evt) {
       var element = evt.target;
       if (element.tagName === 'INPUT') {
         if (FILTERS.indexOf(element.name) >= 0) {
-          callback(element.name, element.value, element.checked);
+          bus.addEvent('FILTER_CHANGE', {filterName: element.name, filterValue: element.value, filterState: element.checked});
         }
       }
     };
 
     var createMapNameToValue = function () {
       var temporaryObject = {};
-      window.common.getKeysArrayFromObject(filterDescription).forEach(function (item) {
-        temporaryObject[filterDescription[item].name] = item;
+      window.common.getKeysArrayFromObject(filter.description).forEach(function (item) {
+        temporaryObject[filter.description[item].name] = item;
       });
       return temporaryObject;
+    };
+
+    var setPriceFilter = function (min, max) {
+      if (links.rangePriceMin && links.rangePriceMax) {
+        links.rangePriceMin.textContent = min;
+        links.rangePriceMax.textContent = max;
+      };
+      filter.state.price.min = min;
+      filter.state.price.max = max;
     };
 
     var generateFilterDescription = function () {
@@ -124,18 +127,28 @@
       return temporaryObject;
     };
 
+    var onInitFilter = function (data) {
+      filter.state.price.min = data.min;
+      filter.state.price.max = data.max;
+      filter.state.price.upperBound = data.upperBound;
+      setPriceFilter(filter.state.price.min, filter.state.price.max);
+      fillAmountByCategory(catalogCards, filter.description);
+      setFilterInteractivity();
+    };
 
-    filterDescription = generateFilterDescription();
-    filterNameToValue = createMapNameToValue();
-
-    prepareFilter();
+    var filter = {
+      state: {'food-type': [], 'food-property': [], 'mark': [], 'price': {min: 0, max: 100, upperBound: 100}, 'all': true},
+      description: generateFilterDescription()
+    };
+    var filterNameToValue = createMapNameToValue();
+    bus.addEvent(events.CHANGE_PRICE, onSliderChange);
+    bus.addEvent(events.FILTER_INIT, onInitFilter);
 
   };
 
   window.filter = {
-    init: init,
     getDescription: function () {
-      return filterDescription;
+      return filter.description;
     },
     getNameToValue: function () {
       return filterNameToValue;
@@ -143,7 +156,13 @@
     getMaxValue: function () {
       return maxValue;
     },
+    getFilterState: function() {
+      return filter.state;
+    },
+
+    init: init,
     fillAmountByCategory: fillAmountByCategory
+
   };
 
 })();

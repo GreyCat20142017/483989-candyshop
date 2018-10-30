@@ -213,8 +213,8 @@
         (result['food-property'] || currentFilterByCategories['food-property'].length === 0)) : result['mark'];
     };
 
-    var renderCatalogByFilter = function (filterName, filterValue, filterState) {
-      setFilterState(filterName, filterValue, filterState);
+    var renderCatalogByFilter = function (data) {
+      setFilterState(data.filterName, data.filterValue, data.filterState);
       var checkedFilters = getCheckedFilters();
       if (checkedFilters.length === 0) {
         renderCatalog(catalogCards, links.catalogCardTemplate, links.catalogContainer);
@@ -232,16 +232,19 @@
 
     var onGetData = function (response) {
       catalogCards = [];
+      var maxValue = 0;
       response.forEach(function (item, index) {
         item.id = 'id-' + index;
         item.selected = false;
         catalogCards.push(item);
+        maxValue = item.price > maxValue ? item.price : maxValue;
       });
       renderCatalog(catalogCards, links.catalogCardTemplate, links.catalogContainer);
       if (window.filter) {
-        currentFilter = window.filter.fillAmountByCategory(catalogCards, window.filter.getDescription());
-        links.rangePriceMin.value = 0;
-        links.rangePriceMax.value = window.filter.getMaxValue();
+        // currentFilter = window.filter.fillAmountByCategory(catalogCards, window.filter.getDescription());
+        // links.rangePriceMin.value = 0;
+        // links.rangePriceMax.value = window.filter.getMaxValue();
+        bus.emitEvent('FILTER_INIT', {min: 0, max: maxValue, upperBound: maxValue});
       }
     };
 
@@ -253,6 +256,7 @@
       if (links.catalogContainer) {
         bus.addEvent(events.ADD_FROM_BASKET, moveUnitFromBasket);
         bus.addEvent(events.REQUEST_TO_BASKET, moveUnitToBasket);
+        bus.addEvent(events.CHANGE_FILTER, renderCatalogByFilter);
         links.catalogContainer.addEventListener('click', onCatalogClick);
       }
 
@@ -268,7 +272,6 @@
     };
 
     var catalogCards = [];
-    // var basketCards = []; //temporary
     var currentFilter = {};
     var currentFilterByCategories = {'food-type': [], 'food-property': [], 'mark': [], 'price': {minPrice: 0, maxPrice: 0}};
 
@@ -281,5 +284,3 @@
   };
 
 })();
-
-
