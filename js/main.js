@@ -8,7 +8,7 @@
   var initApp = function (links) {
     if (window.order) {
       window.order.init(links);
-      bus.emitEvent(events.SWITCH_ORDER_STATE, true);
+      bus.emitEvent(events.SWITCH_ORDER_STATE, {disabled: true, buttonDisabled: true});
     }
     if (window.catalog && window.basket) {
       window.catalog.init(links);

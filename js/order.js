@@ -113,14 +113,30 @@
       }
     };
 
-    var setFieldsetDisabled = function (disabled) {
-      if (links.formPaymentDeliverInputs) {
-        window.common.getArrayFromCollection(links.formPaymentDeliverInputs).forEach(function (element) {
-          element.disabled = disabled;
-        });
+    var setButtonDisableState = function (buttonDisabled) {
+      if (links.orderLink) {
+        var nowDisabled = links.orderLink.classList.contains('goods__order-link--disabled');
+        if (buttonDisabled !== nowDisabled) {
+          if (buttonDisabled) {
+            window.dom.addClassName(links.orderLink, 'goods__order-link--disabled');
+          } else {
+            window.dom.removeClassName(links.orderLink, 'goods__order-link--disabled');
+          }
+        }
       }
-      if (!disabled) {
-        setInitialTabState();
+    };
+
+    var setDisableState = function (data) {
+      setButtonDisableState(data.buttonDisabled);
+      if (data.disabled === data.buttonDisabled) {
+        if (links.formPaymentDeliverInputs) {
+          window.common.getArrayFromCollection(links.formPaymentDeliverInputs).forEach(function (element) {
+            element.disabled = data.disabled;
+          });
+        }
+        if (!data.disabled) {
+          setInitialTabState();
+        }
       }
     };
 
@@ -141,6 +157,13 @@
           });
         }
       });
+    };
+
+
+    var onOrderClick = function (evt) {
+      evt.preventDefault();
+      setDisableState({disabled: false, buttonDisabled: false});
+      window.dom.setFocusOnObject(links.formPaymentDeliverInputs[0]);
     };
 
     var onTabButtonsClick = function (evt) {
@@ -171,6 +194,9 @@
       if (links.paymentButtons) {
         links.paymentButtons.addEventListener('click', onTabButtonsClick);
       }
+      if (links.orderLink) {
+        links.orderLink.addEventListener('click', onOrderClick);
+      }
       if (links.formPaymentDeliver) {
         links.formPaymentDeliver.addEventListener('change', onFormChange);
         links.formPaymentDeliver.addEventListener('submit', onFormSubmit);
@@ -181,7 +207,7 @@
         setInitialTabState();
       }
 
-      bus.addEvent(events.SWITCH_ORDER_STATE, setFieldsetDisabled);
+      bus.addEvent(events.SWITCH_ORDER_STATE, setDisableState);
       validationRules['card-number'].customChecks.push(getCardNumberValidationResult);
     };
 

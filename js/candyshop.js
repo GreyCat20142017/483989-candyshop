@@ -17,9 +17,10 @@
   var links = {
     catalogContainer: document.querySelector('.catalog__cards'),
     catalogCardTemplate: window.dom.getTemplateContent('#card', '.catalog__card'),
-    basketContainer: document.querySelector('.goods__cards'),
+    basketContainer: window.dom.getElementBySelector(formPaymentDeliver, '.goods__cards'),
     basketCardTemplate: window.dom.getTemplateContent('#card-order', '.goods_card'),
     basketMainHeader: document.querySelector('.main-header__basket'),
+    orderLink: window.dom.getElementBySelector(formPaymentDeliver, '.goods__order-link'),
     formPaymentDeliver: formPaymentDeliver,
     formPaymentDeliverInputs: formPaymentDeliver.querySelectorAll('input, textarea'),
     paymentContainer: paymentContainer,

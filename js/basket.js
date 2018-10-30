@@ -37,12 +37,12 @@
           window.dom.removeClassName(links.basketContainer, '.goods__cards--empty');
           window.dom.addClassNameBySelector(links.basketContainer, '.goods__card-empty', 'visually-hidden');
           window.dom.removeClassName(links.goodsTotal, 'visually-hidden');
-          bus.emitEvent(events.SWITCH_ORDER_STATE, false);
+          bus.emitEvent(events.SWITCH_ORDER_STATE, {disabled: true, buttonDisabled: false});
         } else if (dataArray.length === 0) {
           window.dom.addClassName(links.basketContainer, '.goods__cards--empty');
           window.dom.removeClassNameBySelector(links.basketContainer, '.goods__card-empty', 'visually-hidden');
           window.dom.addClassName(links.goodsTotal, 'visually-hidden');
-          bus.emitEvent(events.SWITCH_ORDER_STATE, true);
+          bus.emitEvent(events.SWITCH_ORDER_STATE,  {disabled: true, buttonDisabled: true});
         }
         refreshBasketDependentStates(dataArray);
       }
