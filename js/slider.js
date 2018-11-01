@@ -69,7 +69,7 @@
       links.rangePinA.addEventListener('mousedown', onPinMouseDown);
       links.rangePinB.addEventListener('mousedown', onPinMouseDown);
     }
-    bus.addEvent('FILTER_INIT', setSliderToMinMax);
+    bus.addEvent(events.SLIDER_RESET, setSliderToMinMax);
   };
 
   window.slider = {

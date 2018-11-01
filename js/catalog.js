@@ -37,7 +37,6 @@
     var createCatalogCard = function (template, data) {
       var element = template.cloneNode(true);
       var header = element.querySelector('.card__header');
-      var btnWrapper = element.querySelector('.card__btns-wrap');
       window.dom.setAttributeBySelector(header, '.card__title', 'textContent', data.name);
       window.dom.setAttributeBySelector(header, 'img', 'src', IMG_PATH + data.picture);
       window.dom.setAttributeBySelector(header, 'img', 'alt', data.name);
@@ -49,7 +48,8 @@
       window.dom.replaceClassNameByObject(element, getClassNameByAmount(data.amount), CARD_CLASSES);
       window.dom.replaceClassNameBySelector(element, '.stars__rating', getClassNameByRating(data.rating.value), STAR_CLASSES);
       element.setAttribute(CARD_ID, data.id);
-      btnWrapper.setAttribute(CARD_ID, data.id);
+      window.dom.setAttributeBySelector(element, '.card__btn-composition', CARD_ID, data.id);
+      window.dom.setAttributeBySelector(element, '.card__btns-wrap', CARD_ID, data.id);
       return element;
     };
 
@@ -76,10 +76,15 @@
     };
 
     var showComposition = function (cardID) {
-      var catalogIndex = window.common.getIndexByID(catalogCards, cardID);
+      var catalogIndex = window.common.getIndexByID(window.catalog.cards, cardID);
       if (catalogIndex >= 0) {
-        var composition = catalogCards[catalogIndex].nutritionFacts;
-        console.log(composition);
+        var currentFacts = window.catalog.cards[catalogIndex].nutritionFacts;
+        var composition = currentFacts.contents;
+        var properties = '' + (currentFacts.sugar ? 'C сахаром, ' : 'Без сахара, ') +
+          (currentFacts.gluten ? 'c глютеном, ' : 'без глютена, ') +
+          (currentFacts.vegetarian ? 'вегетаринское' : 'не вегетаринское. ') +
+          'Энергетическая ценность: ' + currentFacts.energy + '.';
+        console.log(window.catalog.cards[catalogIndex].name + '. ' + 'Состав продукта: ' + composition + '.  Свойства продукта: ' + properties);
       }
     };
 
@@ -99,11 +104,8 @@
           moveUnitToBasket(element.parentElement.getAttribute(CARD_ID));
           return false;
         }
-        if (element.classList.contains('card__btn-composition')) {
-          var ancestor = element.parentElement.parentElement.parentElement;
-          if (ancestor.hasAttribute(CARD_ID)) {
-            showComposition(ancestor.getAttribute(CARD_ID));
-          }
+        if (element.classList.contains('card__btn-composition') && element.hasAttribute(CARD_ID)) {
+          showComposition(element.getAttribute(CARD_ID));
           return false;
         }
         element = element.parentNode;
@@ -119,14 +121,14 @@
     };
 
     var switchCardSelected = function (cardID) {
-      var catalogIndex = window.common.getIndexByID(catalogCards, cardID);
-      catalogCards[catalogIndex].selected = !(catalogCards[catalogIndex].selected);
+      var catalogIndex = window.common.getIndexByID(window.catalog.cards, cardID);
+      window.catalog.cards[catalogIndex].selected = !(window.catalog.cards[catalogIndex].selected);
     };
 
     var moveUnitToBasket = function (cardID) {
-      var catalogIndex = window.common.getIndexByID(catalogCards, cardID);
+      var catalogIndex = window.common.getIndexByID(window.catalog.cards, cardID);
       if (catalogIndex >= 0) {
-        var source = catalogCards[catalogIndex];
+        var source = window.catalog.cards[catalogIndex];
         if (source.amount > 0) {
           source.amount = source.amount - 1;
           checkCatalogAmount(source, cardID, false);
@@ -136,55 +138,12 @@
     };
 
     var moveUnitFromBasket = function (data) {
-      var catalogIndex = window.common.getIndexByID(catalogCards, data.cardID);
+      var catalogIndex = window.common.getIndexByID(window.catalog.cards, data.cardID);
       if (catalogIndex >= 0) {
-        var target = catalogCards[catalogIndex];
+        var target = window.catalog.cards[catalogIndex];
         target.amount = target.amount + data.amount;
         checkCatalogAmount(target, data.cardID, (Math.abs(data.amount) === 1) ? false : true);
       }
-    };
-
-    var unsetContradictoryFilter = function (filterTypes) {
-      filterTypes.forEach(function (filterType) {
-        currentFilterByCategories[filterType] = [];
-        Object.keys(currentFilter).map(function (key) {
-          return key;
-        }).forEach(function (item) {
-          if (currentFilter[item].filterType === filterType) {
-            currentFilter[item].state = false;
-            currentFilter[item].basicDom.checked = false;
-          }
-        });
-      });
-    };
-
-    var setThisFilter = function (filterType, filterValue) {
-      currentFilterByCategories[filterType].push(filterValue);
-    };
-
-    var unsetThisFilter = function (filterType, filterValue) {
-      currentFilterByCategories[filterType] = currentFilterByCategories[filterType].filter(function (item) {
-        return item !== filterValue;
-      });
-    };
-
-    var setFilterState = function (filterName, filterValue, filterState) {
-      var filterType = currentFilter[filterValue].filterType;
-      currentFilter[filterValue].state = filterState;
-      if (filterState) {
-        unsetContradictoryFilter((filterType === 'mark') ? ['food-type', 'food-property'] : ['mark']);
-        setThisFilter(filterType, filterValue);
-      } else {
-        unsetThisFilter(filterType, filterValue);
-      }
-    };
-
-    var getCheckedFilters = function () {
-      return Object.keys(currentFilter).map(function (key) {
-        return currentFilter[key];
-      }).filter(function (filterElement) {
-        return filterElement.state && (filterElement.filterType !== 'sort');
-      });
     };
 
     var isMatch = function (filterElement, card) {
@@ -211,38 +170,90 @@
       return matchResult;
     };
 
-    var getMatchResult = function (card, checkedFilters) {
-      var result = {'food-type': false, 'food-property': false, 'mark': false};
-      for (var i = 0; i < checkedFilters.length; i++) {
-        result[checkedFilters[i].filterType] = result[checkedFilters[i].filterType] || isMatch(checkedFilters[i], card);
+    var getMatchResult = function (card, userFilter) {
+      var checkedFilters = userFilter.state;
+      if (checkedFilters.mark.length > 0) {
+        return isMatch(userFilter.description[checkedFilters['mark'][0]], card);
+      } else {
+        var result = checkedFilters['food-type'].length === 0 ? true : false;
+        for (var i = 0; i < checkedFilters['food-type'].length; i++) {
+          result = result || isMatch(userFilter.description[checkedFilters['food-type'][i]], card);
+        }
+        for (i = 0; i < checkedFilters['food-property'].length; i++) {
+          result = result && isMatch(userFilter.description[checkedFilters['food-property'][i]], card);
+        }
+        result = result && (card.price >= checkedFilters.price.min) && (card.price <= checkedFilters.price.max);
+        return result;
       }
-      return (currentFilterByCategories['mark'].length === 0) ? ((result['food-type'] || currentFilterByCategories['food-type'].length === 0) &&
-        (result['food-property'] || currentFilterByCategories['food-property'].length === 0)) : result['mark'];
     };
 
-    var renderCatalogByFilter = function (data) {
-      setFilterState(data.filterName, data.filterValue, data.filterState);
-      var checkedFilters = getCheckedFilters();
-      if (checkedFilters.length === 0) {
-        renderCatalog(catalogCards, links.catalogCardTemplate, links.catalogContainer);
+    var renderCatalogByFilter = function (userFilter) {
+      window.catalog.cardsByConditions = (!userFilter || userFilter.length === 0) ? window.catalog.cards.slice() : window.catalog.cards.filter(function (card) {
+        return getMatchResult(card, userFilter);
+      });
+      if (window.catalog.cardsByConditions.length === 0) {
+        renderCatalogMessage(links.emptyFiltersTemplate, links.catalogContainer);
       } else {
-        var filteredCatalogCards = catalogCards.filter(function (card) {
-          return getMatchResult(card, checkedFilters);
-        });
-        if (filteredCatalogCards.length === 0) {
-          renderCatalogMessage(links.emptyFiltersTemplate, links.catalogContainer);
-        } else {
-          renderCatalog(filteredCatalogCards, links.catalogCardTemplate, links.catalogContainer);
-        }
+        renderCatalog(window.catalog.cardsByConditions, links.catalogCardTemplate, links.catalogContainer);
       }
+    };
+
+    var onFilterChange = function (userFilter) {
+      renderCatalogByFilter(userFilter);
+      onSortChange(userFilter);
+    };
+
+    var onSortChange = function (userFilter) {
+      switch (userFilter.sort) {
+        case 'popular' :
+          renderCatalog(window.catalog.cardsByConditions, links.catalogCardTemplate, links.catalogContainer);
+          break;
+        case 'expensive' :
+          renderCatalog(getCardsByPrice(window.catalog.cardsByConditions, false), links.catalogCardTemplate, links.catalogContainer);
+          break;
+        case 'cheep' :
+          renderCatalog(getCardsByPrice(window.catalog.cardsByConditions, true), links.catalogCardTemplate, links.catalogContainer);
+          break;
+        case 'rating' :
+          renderCatalog(getCardsByRating(window.catalog.cardsByConditions), links.catalogCardTemplate, links.catalogContainer);
+          break;
+        default:
+          renderCatalog(window.catalog.cardsByConditions, links.catalogCardTemplate, links.catalogContainer);
+          break;
+      }
+    };
+
+    var getCardsByRating = function (sourceArray) {
+      var reSortedArray = sourceArray.slice().sort(function (firstItem, secondItem) {
+        var rank = secondItem.rating.value - firstItem.rating.value;
+        if (rank === 0) {
+          rank = secondItem.rating.number - firstItem.rating.number;
+        }
+        if (rank === 0) {
+          rank = (firstItem.name && secondItem.name) ? window.common.getStringCompareResult(firstItem.name, secondItem.name) : 0;
+        }
+        return rank;
+      });
+      return reSortedArray;
+    };
+
+    var getCardsByPrice = function (sourceArray, ascending) {
+      var reSortedArray = sourceArray.slice().sort(function (firstItem, secondItem) {
+        var rank = (secondItem.price - firstItem.price) * (ascending ? (-1) : 1);
+        if (rank === 0) {
+          rank = window.common.getStringCompareResult(firstItem.name, secondItem.name);
+        }
+        return rank;
+      });
+      return reSortedArray;
     };
 
     var onRequestFromFilter = function () {
-      bus.emitEvent(events.ANSWER_CATALOG_FILTER, catalogCards);
+      bus.emitEvent(events.ANSWER_CATALOG_FILTER, window.catalog.cards);
     };
 
     var onGetData = function (response) {
-      catalogCards = [];
+      var catalogCards = [];
       var maxValue = 0;
       response.forEach(function (item, index) {
         item.id = 'id-' + index;
@@ -250,8 +261,10 @@
         catalogCards.push(item);
         maxValue = item.price > maxValue ? item.price : maxValue;
       });
-      renderCatalog(catalogCards, links.catalogCardTemplate, links.catalogContainer);
+
+      window.catalog.cards = catalogCards.slice();
       bus.emitEvent(events.FILTER_INIT, {min: 0, max: maxValue, upperBound: maxValue});
+      renderCatalogByFilter(null);
     };
 
     var onGetDataError = function (errorMessage) {
@@ -264,6 +277,8 @@
         bus.addEvent(events.REQUEST_TO_BASKET, moveUnitToBasket);
         bus.addEvent(events.CHANGE_FILTER, renderCatalogByFilter);
         bus.addEvent(events.REQUEST_FILTER_CATALOG, onRequestFromFilter);
+        bus.addEvent(events.CHANGE_FILTER, onFilterChange);
+        bus.addEvent(events.CHANGE_SORT, onSortChange);
         links.catalogContainer.addEventListener('click', onCatalogClick);
       }
 
@@ -274,13 +289,9 @@
         window.slider.init(links);
       }
       if (window.filter) {
-        window.filter.init(links, catalogCards);
+        window.filter.init(links);
       }
     };
-
-    var catalogCards = [];
-    var currentFilter = {};
-    var currentFilterByCategories = {'food-type': [], 'food-property': [], 'mark': [], 'price': {minPrice: 0, maxPrice: 0}};
 
     initCatalog();
 

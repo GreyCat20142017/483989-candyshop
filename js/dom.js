@@ -42,7 +42,11 @@
     setAttributeBySelector: function (parentElement, selector, attribute, value) {
       var descendantElement = parentElement.querySelector(selector);
       if (descendantElement) {
-        descendantElement[attribute] = value;
+        if (descendantElement[attribute]) {
+          descendantElement[attribute] = value;
+        } else {
+          descendantElement.setAttribute(attribute, value);
+        }
       }
     },
 
