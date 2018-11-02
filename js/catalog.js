@@ -188,7 +188,7 @@
     };
 
     var renderCatalogByFilter = function (userFilter) {
-      window.catalog.cardsByConditions = (!userFilter || userFilter.length === 0) ? window.catalog.cards.slice() : window.catalog.cards.filter(function (card) {
+      window.catalog.cardsByConditions = (!userFilter || userFilter.allUnset) ? window.catalog.cards.slice() : window.catalog.cards.filter(function (card) {
         return getMatchResult(card, userFilter);
       });
       if (window.catalog.cardsByConditions.length === 0) {
@@ -200,7 +200,9 @@
 
     var onFilterChange = function (userFilter) {
       renderCatalogByFilter(userFilter);
-      onSortChange(userFilter);
+      if (window.catalog.cardsByConditions.length > 0) {
+        onSortChange(userFilter);
+      }
     };
 
     var onSortChange = function (userFilter) {

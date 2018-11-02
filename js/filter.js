@@ -59,6 +59,7 @@
         filter.state.price.max = Math.floor(Math.max(data.firstValue, data.secondValue) * filter.priceUpperBound / 100);
         links.rangePriceMin.textContent = filter.state.price.min;
         links.rangePriceMax.textContent = filter.state.price.max;
+        filter.allUnset = getAllUnsetStatus();
         bus.emitEvent(events.CHANGE_FILTER, filter);
       }
     };
@@ -72,6 +73,19 @@
 
     var setFilterInteractivity = function () {
       switchFilterInteractivity('addEventListener');
+    };
+
+    var unsetContradictoryFilter = function (filterTypes) {
+      filterTypes.forEach(function (type) {
+        filter.state[type] = [];
+        Object.keys(filter.description).map(function (key) {
+          return key;
+        }).forEach(function (item) {
+          if (filter.description[item].filterType === type) {
+            filter.description[item].basicDom.checked = false;
+          }
+        });
+      });
     };
 
     var setThisFilter = function (filterType, filterValue) {
@@ -89,23 +103,23 @@
       bus.emitEvent(events.CHANGE_SORT, filter);
     };
 
-    var onFilterStateChange = function (filterType, filterValue, filterChecked) {
-      /*  Если по типу фильтра в массиве сответствующее значение Истина - нужно сбросить текущее состояние всех фильтров */
-      if (FILTER_TYPES[filterType]) {
-        resetAllFilter();
-      }
-      if (filterType !== 'all') {
-        if (filterChecked) {
-          setThisFilter(filterType, filterValue);
-        } else {
-          unsetThisFilter(filterType, filterValue);
-        }
-      }
-      bus.emitEvent(events.CHANGE_FILTER, filter);
+    var getBasicUnsetStatus = function () {
+      return (filter.state['food-type'].length === 0) &&
+      (filter.state['food-property'].length === 0) &&
+      (filter.state['mark'].length === 0);
+    }
+
+    var getPriceUnsetStatus = function () {
+      (filter.state['price'].max === filter.upperBound) &&
+      (filter.state['price'].min === 0);
     };
 
-    var getDefaultFilterState = function () {
-      return {'food-type': [], 'food-property': [], 'mark': [], 'price': {min: 0, max: 100}};
+    var getAllUnsetStatus = function () {
+      return getPriceUnsetStatus() && getBasicUnsetStatus();
+    }
+
+    var getDefaultFilterState = function (upperBound) {
+      return {'food-type': [], 'food-property': [], 'mark': [], 'price': {min: 0, max: upperBound}};
     };
 
     var getDefaultSortState = function () {
@@ -114,14 +128,39 @@
 
     var resetAllFilter = function () {
       filter.sort = getDefaultSortState();
-      filter.state = getDefaultFilterState();
-      filter.state.price.max = filter.priceUpperBound;
+      filter.state = getDefaultFilterState(filter.priceUpperBound);
       setPriceFilter(filter.state.price.min, filter.state.price.max);
       bus.emitEvent(events.SLIDER_RESET);
       window.common.getArrayFromObject(filter.description).forEach(function (item) {
         item.basicDom.checked = false;
       });
       filter.description[filter.sort].basicDom.checked = true;
+    };
+
+    var restoreCurrent = function (filterType, filterValue, filterChecked) {
+      if (filterType === 'mark' && filterChecked) {
+       filter.description[filterValue].basicDom.checked = filterChecked;
+       setThisFilter(filterType, filterValue);
+      }
+    };
+
+    var onFilterStateChange = function (filterType, filterValue, filterChecked) {
+      /*  Если по типу фильтра в объекте FILTER_TYPES сответствующее значение === Истина - нужно сбросить текущее состояние всех фильтров */
+      /*  Но если это фильтр типа mark, переключенный в checked===true - нужно восстановить его состояние после сброса. Во набредила-то... */
+      if (FILTER_TYPES[filterType]) {
+        resetAllFilter();
+        restoreCurrent(filterType, filterValue, filterChecked);
+      }
+      if (filterType !== 'all') {
+        if (filterChecked) {
+          setThisFilter(filterType, filterValue);
+          unsetContradictoryFilter((filterType === 'mark') ? ['food-type', 'food-property'] : ['mark']);
+        } else {
+          unsetThisFilter(filterType, filterValue);
+        }
+      }
+      filter.allUnset = getAllUnsetStatus();
+      bus.emitEvent(events.CHANGE_FILTER, filter);
     };
 
     var onFormChange = function (evt) {
@@ -190,9 +229,10 @@
 
     var filter = {
       description: generateFilterDescription(),
-      state: {'food-type': [], 'food-property': [], 'mark': [], 'price': {min: 0, max: 100}, 'all': true},
+      state: getDefaultFilterState(100),
       sort: 'popular',
-      priceUpperBound: 100
+      priceUpperBound: 100,
+      allUnset: true
     };
 
     bus.addEvent(events.CHANGE_PRICE, onSliderChange);
