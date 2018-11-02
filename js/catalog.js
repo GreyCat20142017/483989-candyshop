@@ -79,18 +79,20 @@
       var catalogIndex = window.common.getIndexByID(window.catalog.cards, cardID);
       if (catalogIndex >= 0) {
         var currentFacts = window.catalog.cards[catalogIndex].nutritionFacts;
-        var composition = currentFacts.contents;
+        var composition = currentFacts.contents + '.';
         var properties = '' + (currentFacts.sugar ? 'C сахаром, ' : 'Без сахара, ') +
-          (currentFacts.gluten ? 'c глютеном, ' : 'без глютена, ') +
-          (currentFacts.vegetarian ? 'вегетаринское' : 'не вегетаринское. ') +
-          'Энергетическая ценность: ' + currentFacts.energy + '.';
-        console.log(window.catalog.cards[catalogIndex].name + '. ' + 'Состав продукта: ' + composition + '.  Свойства продукта: ' + properties);
+        (currentFacts.gluten ? 'c глютеном, ' : 'без глютена, ') +
+        (currentFacts.vegetarian ? 'вегетаринское. ' : 'не вегетаринское. ') +
+        'Энергетическая ценность: ' + currentFacts.energy + '.';
+        var title = window.catalog.cards[catalogIndex].kind + ' "' + window.catalog.cards[catalogIndex].name + '".';
+        window.message.init(null, '', document.activeElement, {title: title, composition: 'Состав продукта: ' + composition,
+          properties: 'Свойства продукта: ' + properties, insertionPoint: document.activeElement.parentElement});
       }
     };
 
     var onCatalogClick = function (evt) {
       var element = evt.target;
-      if ((element.tagName !== 'A') && (element.tagName !== 'BUTTON')) {
+      if (((element.tagName !== 'A') && (element.tagName !== 'BUTTON')) || element.classList.contains('modal__close')) {
         return false;
       }
       evt.preventDefault();
@@ -173,7 +175,8 @@
     var getMatchResult = function (card, userFilter) {
       var checkedFilters = userFilter.state;
       if (checkedFilters.mark.length > 0) {
-        return isMatch(userFilter.description[checkedFilters['mark'][0]], card);
+        return isMatch(userFilter.description[checkedFilters['mark'][0]], card) &&
+        (card.price >= checkedFilters.price.min) && (card.price <= checkedFilters.price.max);
       } else {
         var result = checkedFilters['food-type'].length === 0 ? true : false;
         for (var i = 0; i < checkedFilters['food-type'].length; i++) {

@@ -2,7 +2,7 @@
 
 (function () {
 
-  var init = function (messageLink, messageTitle, previousObject) {
+  var init = function (messageLink, messageTitle, previousObject, specific) {
 
     var showMessage = function () {
       setMessageInteractivity();
@@ -17,20 +17,24 @@
       removeMessageInteractivity();
       window.dom.addClassName(messageLink, 'modal--hidden');
       if (button) {
-        window.dom.setFocusOnObject(button);
         button.tabIndex = window.general.getDefaultTabIndex();
+      }
+      if (specific) {
+        specific.insertionPoint.removeChild(messageLink);
+        specific.insertionPoint = null;
+        messageLink = null;
       }
       window.dom.setFocusOnObject(previousObject);
     };
 
-    var onDocumentKeyDown = function (evt) {
-      window.general.isEscEvent(evt, hideMessage);
-    };
-
     var onDocumentClick = function (evt) {
-      if (!messageLink.children[0].contains(evt.target)) {
+      if (!previousObject.parentElement.contains(evt.target)) {
         window.general.isEvent(evt, hideMessage);
       }
+    };
+
+    var onDocumentKeyDown = function (evt) {
+      window.general.isEscEvent(evt, hideMessage);
     };
 
     var onSingleButtonTabKeyDown = function (evt) {
@@ -65,13 +69,44 @@
       }
     };
 
+    var createSpecificMessage = function () {
+      var createChild = function (tag, content) {
+        var tmp = document.createElement(tag);
+        tmp.textContent = content;
+        return tmp;
+      };
 
-    var button = messageLink.querySelector('button');
-    if (messageTitle) {
-      setMessageTitle(messageTitle);
+      if (specific && previousObject) {
+        var div = document.createElement('div');
+        div.style =
+        'position: absolute; z-index: 5; font-size: 14px; width: 268px; text-align: center; padding: 20px; background-color: rgb(255, 233, 111); ' +
+        'background-image: radial-gradient(circle, rgba(255, 255, 255, 0.7) 10%, rgba(255, 255, 255, 0.5) 50%,  transparent 100%); ' +
+        'box-shadow: 0 6px 15px 0 rgba(0, 1, 1, 0.45); border-radius: 6px; top: 48px ; left: -10px;';
+        div.classList.add('card__popup');
+        div.appendChild(createChild('h2', specific.title));
+        div.appendChild(createChild('p', specific.properties));
+        div.appendChild(createChild('p', specific.composition));
+        var btn = createChild('button', 'закрыть');
+        btn.setAttribute('type', 'button');
+        btn.classList.add('modal__close');
+        div.appendChild(btn);
+        return specific.insertionPoint.appendChild(div);
+      }
+      return false;
+    };
+
+    if (messageLink) {
+      if (messageTitle) {
+        setMessageTitle(messageTitle);
+      }
+    } else {
+      messageLink = specific.insertionPoint.querySelector('.card__popup');
+      if (!messageLink) {
+        messageLink = createSpecificMessage();
+      }
     }
+    var button = messageLink.querySelector('button');
     showMessage();
-
   };
 
   window.message = {

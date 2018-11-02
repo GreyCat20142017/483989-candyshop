@@ -56,7 +56,7 @@
     var onSliderChange = function (data) {
       if (links.rangePriceMin && links.rangePriceMax) {
         filter.state.price.min = Math.floor(Math.min(data.firstValue, data.secondValue) * filter.priceUpperBound / 100);
-        filter.state.price.max = Math.floor(Math.max(data.firstValue, data.secondValue) * filter.priceUpperBound / 100);
+        filter.state.price.max = Math.ceil(Math.max(data.firstValue, data.secondValue) * filter.priceUpperBound / 100);
         links.rangePriceMin.textContent = filter.state.price.min;
         links.rangePriceMax.textContent = filter.state.price.max;
         filter.allUnset = getAllUnsetStatus();
@@ -107,16 +107,16 @@
       return (filter.state['food-type'].length === 0) &&
       (filter.state['food-property'].length === 0) &&
       (filter.state['mark'].length === 0);
-    }
+    };
 
     var getPriceUnsetStatus = function () {
-      (filter.state['price'].max === filter.upperBound) &&
+      return (filter.state['price'].max === filter.upperBound) &&
       (filter.state['price'].min === 0);
     };
 
     var getAllUnsetStatus = function () {
       return getPriceUnsetStatus() && getBasicUnsetStatus();
-    }
+    };
 
     var getDefaultFilterState = function (upperBound) {
       return {'food-type': [], 'food-property': [], 'mark': [], 'price': {min: 0, max: upperBound}};
@@ -139,8 +139,8 @@
 
     var restoreCurrent = function (filterType, filterValue, filterChecked) {
       if (filterType === 'mark' && filterChecked) {
-       filter.description[filterValue].basicDom.checked = filterChecked;
-       setThisFilter(filterType, filterValue);
+        filter.description[filterValue].basicDom.checked = filterChecked;
+        setThisFilter(filterType, filterValue);
       }
     };
 
