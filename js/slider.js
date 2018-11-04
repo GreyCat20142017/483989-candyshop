@@ -26,23 +26,18 @@
     var onPinMouseDown = function (evt) {
       var refreshSliderState = function (moveUpEvt) {
         var newX = moveUpEvt.pageX - shiftX - sliderX;
-        var rangeLeft = window.dom.getXCoordinate(links.rangeFilter);
         var sliderValue = Math.floor(getLimitedValue(newX, 0, rangeWidth) / rangeWidth * 100);
-
         currentPin.style.left = sliderValue + '%';
-        var pinALeft = 100 * (window.dom.getXCoordinate(links.rangePinA) - rangeLeft) / rangeWidth;
-        var pinBLeft = 100 * (window.dom.getXCoordinate(links.rangePinB) - rangeLeft) / rangeWidth;
+        var pinALeft = getLimitedValue(parseInt(getComputedStyle(links.rangePinA).left, 10) / rangeWidth * 100, 0, 100);
+        var pinBLeft = getLimitedValue(parseInt(getComputedStyle(links.rangePinB).left, 10) / rangeWidth * 100, 0, 100);
         if (pinALeft > pinBLeft) {
           links.rangeLine.style.left = pinBLeft + '%';
-          links.rangeLine.style.right = (100 - pinALeft) + '%';
+          links.rangeLine.style.right = (100 - Math.ceil(pinALeft)) + '%';
         } else {
           links.rangeLine.style.left = pinALeft + '%';
-          links.rangeLine.style.right = (100 - pinBLeft) + '%';
+          links.rangeLine.style.right = (100 - Math.ceil(pinBLeft)) + '%';
         }
-
-        bus.emitEvent(events.CHANGE_PRICE, {
-          firstValue: getLimitedValue(parseInt(getComputedStyle(links.rangePinA).left, 10) / rangeWidth * 100, 0, 100),
-          secondValue: getLimitedValue(parseInt(getComputedStyle(links.rangePinB).left, 10) / rangeWidth * 100, 0, 100)});
+        bus.emitEvent(events.CHANGE_PRICE, {firstValue: pinALeft, secondValue: pinBLeft});
       };
 
       var onPinMouseUp = function (upEvt) {

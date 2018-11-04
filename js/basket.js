@@ -3,7 +3,7 @@
 (function () {
   var CARD_ID = 'data-id';
   var IMG_PATH = 'img/cards/';
-  var CARD_BUTTONS = {DECREASE : 'card-order__btn--decrease' , INCREASE: 'card-order__btn--increase' , REMOVE: 'card-order__close'};
+  var CARD_BUTTONS = {DECREASE: 'card-order__btn--decrease', INCREASE: 'card-order__btn--increase', REMOVE: 'card-order__close'};
 
   var bus = window.mediator.bus;
   var events = window.candyevents;

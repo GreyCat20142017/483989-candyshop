@@ -78,8 +78,8 @@
 
       if (specific && previousObject) {
         var div = document.createElement('div');
-        var layoutStyle = specific.fixed ?  'position: fixed; top: 50%; left: 50%; margin-left: -240px; width: 480px;' :
-         'position: absolute; top: 48px ; left: -10px; width: 268px;';
+        var layoutStyle = specific.fixed ? 'position: fixed; top: 50%; left: 50%; margin-left: -240px; width: 480px;' :
+          'position: absolute; top: 48px ; left: -10px; width: 268px;';
         div.style =
         layoutStyle + 'z-index: 5; font-size: 14px;  text-align: center; padding: 20px; background-color: rgb(255, 233, 111); ' +
         'background-image: radial-gradient(circle, rgba(255, 255, 255, 0.7) 10%, rgba(255, 255, 255, 0.5) 50%,  transparent 100%); ' +

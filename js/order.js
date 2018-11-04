@@ -209,14 +209,12 @@
         }
         setInitialTabState();
       }
-
       bus.addEvent(events.SWITCH_ORDER_STATE, setDisableState);
       validationRules['card-number'].customChecks.push(getCardNumberValidationResult);
     };
 
     presetOrder();
   };
-
 
   window.order = {
     init: init

@@ -125,6 +125,7 @@
     var switchCardSelected = function (cardID) {
       var catalogIndex = window.common.getIndexByID(window.catalog.cards, cardID);
       window.catalog.cards[catalogIndex].selected = !(window.catalog.cards[catalogIndex].selected);
+      bus.emitEvent(events.REQUEST_STATE_FAVORITE);
     };
 
     var moveUnitToBasket = function (cardID) {
@@ -133,8 +134,12 @@
         var source = window.catalog.cards[catalogIndex];
         if (source.amount > 0) {
           source.amount = source.amount - 1;
+          var needRequestMarkState = (source.amount === 0);
           checkCatalogAmount(source, cardID, false);
           bus.emitEvent(events.ADD_TO_BASKET, {cardID: cardID, amount: 1, source: source});
+          if (needRequestMarkState) {
+            bus.emitEvent(events.REQUEST_STATE_AVAILABILITY);
+          }
         }
       }
     };
@@ -143,8 +148,12 @@
       var catalogIndex = window.common.getIndexByID(window.catalog.cards, data.cardID);
       if (catalogIndex >= 0) {
         var target = window.catalog.cards[catalogIndex];
+        var needRequestMarkState = ((target.amount === 0) && (data.amount !== 0));
         target.amount = target.amount + data.amount;
         checkCatalogAmount(target, data.cardID, (Math.abs(data.amount) === 1) ? false : true);
+        if (needRequestMarkState) {
+          bus.emitEvent(events.REQUEST_STATE_AVAILABILITY);
+        }
       }
     };
 
@@ -201,31 +210,12 @@
       }
     };
 
-    var onFilterChangeDebounce = function (userFilter) {
+    var onFilterChange = function (userFilter) {
       renderCatalogByFilter(userFilter);
       if (window.catalog.cardsByConditions.length > 0) {
         onSortChange(userFilter);
       }
     };
-
-    var onFilterChange = window.common.debounce(function (userFilter) {
-        onFilterChangeDebounce(userFilter);
-    });
-
-
-
-    //  var onFilterChange = window.common.debounce(function (button) {
-    //     renderPhotosByFilter(button.id, button);
-    //   });
-
-    //   var onFilterClick = function (evt) {
-    //     var element = evt.target;
-    //     if (element.tagName === 'BUTTON' && element.classList.contains('img-filters__button')) {
-    //       onFilterChange(element);
-    //     }
-    //   };
-    //   showFilter();
-    // };
 
     var onSortChange = function (userFilter) {
       switch (userFilter.sort) {
@@ -311,12 +301,12 @@
       }
       if (window.slider) {
         window.slider.init(links);
-      } else  {
+      } else {
         window.dom.addClassName(links.rangeFilter, 'modal--hidden');
       }
       if (window.filter) {
         window.filter.init(links);
-      } else  {
+      } else {
         window.dom.addClassName(links.formFilter, 'modal--hidden');
       }
     };

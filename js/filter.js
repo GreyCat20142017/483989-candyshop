@@ -98,11 +98,6 @@
       });
     };
 
-    var onSortStateChange = function (sortValue) {
-      filter.sort = sortValue;
-      bus.emitEvent(events.CHANGE_SORT, filter);
-    };
-
     var getBasicUnsetStatus = function () {
       return (filter.state['food-type'].length === 0) &&
       (filter.state['food-property'].length === 0) &&
@@ -144,7 +139,12 @@
       }
     };
 
-    var onFilterStateChange = function (filterType, filterValue, filterChecked) {
+    var onSortStateChange = window.common.debounce(function (sortValue) {
+      filter.sort = sortValue;
+      bus.emitEvent(events.CHANGE_SORT, filter);
+    });
+
+    var onFilterStateChange = window.common.debounce(function (filterType, filterValue, filterChecked) {
       /*  Если по типу фильтра в объекте FILTER_TYPES сответствующее значение === Истина - нужно сбросить текущее состояние всех фильтров */
       /*  Но если это фильтр типа mark, переключенный в checked===true - нужно восстановить его состояние после сброса. Во набредила-то... */
       if (FILTER_TYPES[filterType]) {
@@ -161,7 +161,7 @@
       }
       filter.allUnset = getAllUnsetStatus();
       bus.emitEvent(events.CHANGE_FILTER, filter);
-    };
+    });
 
     var onFormChange = function (evt) {
       var element = evt.target;
@@ -174,6 +174,20 @@
           }
         }
       }
+    };
+
+    var checkMarkState = function (markName) {
+      if (filter.description[markName].basicDom.checked) {
+        bus.emitEvent(events.CHANGE_FILTER, filter);
+      }
+    };
+
+    var onCheckFavorite = function () {
+      checkMarkState('favorite');
+    };
+
+    var onCheckAvailability = function () {
+      checkMarkState('availability');
     };
 
     var onFormSubmit = function (evt) {
@@ -238,6 +252,8 @@
     bus.addEvent(events.CHANGE_PRICE, onSliderChange);
     bus.addEvent(events.FILTER_INIT, onInitFilter);
     bus.addEvent(events.ANSWER_CATALOG_FILTER, onAnswerFromCatalog);
+    bus.addEvent(events.REQUEST_STATE_FAVORITE, onCheckFavorite);
+    bus.addEvent(events.REQUEST_STATE_AVAILABILITY, onCheckAvailability);
   };
 
   window.filter = {

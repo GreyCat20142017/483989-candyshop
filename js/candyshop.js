@@ -1,7 +1,7 @@
 'use strict';
 
 (function () {
-  var MODULES = ['common', 'general', 'dom', 'mediator', 'candyevents', 'backend', 'main' , 'catalog', 'basket', 'order'];
+  var MODULES = ['common', 'general', 'dom', 'mediator', 'candyevents', 'backend', 'main', 'catalog', 'basket', 'order'];
 
   var checkModuleAddition = function () {
     return !MODULES.some(function (item) {
