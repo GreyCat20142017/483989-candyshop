@@ -1,7 +1,6 @@
 'use strict';
 
 (function () {
-
   var bus = window.mediator.bus;
   var events = window.candyevents;
 

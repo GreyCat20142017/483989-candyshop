@@ -6,6 +6,8 @@
     ADD_TO_BASKET: 'ADD_TO_BASKET',
     ADD_FROM_BASKET: 'ADD_FROM_BASKET',
     REQUEST_TO_BASKET: 'REQUEST_TO_BASKET',
+    /* Очистка корзины без возвращения в каталог по запросу модуля order (после успешного сабмита) */
+    RESET_BASKET: 'RESET_BASKET',
     /* Запрос данных каталога для подсчета количества карточек по типам фильтра: filter-catalog */
     REQUEST_FILTER_CATALOG: 'REQUEST_FILTER_CATALOG',
     ANSWER_CATALOG_FILTER: 'ANSWER_CATALOG__FILTER',

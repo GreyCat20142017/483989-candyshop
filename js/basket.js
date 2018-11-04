@@ -3,6 +3,7 @@
 (function () {
   var CARD_ID = 'data-id';
   var IMG_PATH = 'img/cards/';
+  var CARD_BUTTONS = {DECREASE : 'card-order__btn--decrease' , INCREASE: 'card-order__btn--increase' , REMOVE: 'card-order__close'};
 
   var bus = window.mediator.bus;
   var events = window.candyevents;
@@ -79,15 +80,15 @@
           removeUnitFromBasket(element.getAttribute(CARD_ID), element);
           return false;
         }
-        if (element.classList.contains('card-order__btn--decrease')) {
+        if (element.classList.contains(CARD_BUTTONS.DECREASE)) {
           eventDescription.toBasket = false;
           eventDescription.wasButtonClicked = true;
         }
-        if (element.classList.contains('card-order__btn--increase')) {
+        if (element.classList.contains(CARD_BUTTONS.INCREASE)) {
           eventDescription.toBasket = true;
           eventDescription.wasButtonClicked = true;
         }
-        if (element.classList.contains('card-order__close')) {
+        if (element.classList.contains(CARD_BUTTONS.REMOVE)) {
           eventDescription.toBasket = false;
           eventDescription.wasLinkClicked = true;
         }
@@ -141,10 +142,23 @@
       }
     };
 
+    var resetBasket = function () {
+      var removePrevious = function (insertionPoint) {
+        var oldBasketCards = insertionPoint.querySelectorAll('.goods_card');
+        Array.prototype.slice.call(oldBasketCards).forEach(function (element) {
+          insertionPoint.removeChild(element);
+        });
+      };
+      basketCards = [];
+      removePrevious(links.basketContainer);
+      refreshBasketState(basketCards);
+    };
+
     var basketCards = [];
 
     if (links.basketContainer) {
       bus.addEvent(events.ADD_TO_BASKET, addUnitToBasket);
+      bus.addEvent(events.RESET_BASKET, resetBasket);
       links.basketContainer.addEventListener('click', onBasketClick);
     }
   };

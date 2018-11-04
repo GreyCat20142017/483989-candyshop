@@ -86,7 +86,7 @@
         'Энергетическая ценность: ' + currentFacts.energy + '.';
         var title = window.catalog.cards[catalogIndex].kind + ' "' + window.catalog.cards[catalogIndex].name + '".';
         window.message.init(null, '', document.activeElement, {title: title, composition: 'Состав продукта: ' + composition,
-          properties: 'Свойства продукта: ' + properties, insertionPoint: document.activeElement.parentElement});
+          properties: 'Свойства продукта: ' + properties, insertionPoint: document.activeElement.parentElement.parentElement, fixed: false});
       }
     };
 
@@ -201,12 +201,31 @@
       }
     };
 
-    var onFilterChange = function (userFilter) {
+    var onFilterChangeDebounce = function (userFilter) {
       renderCatalogByFilter(userFilter);
       if (window.catalog.cardsByConditions.length > 0) {
         onSortChange(userFilter);
       }
     };
+
+    var onFilterChange = window.common.debounce(function (userFilter) {
+        onFilterChangeDebounce(userFilter);
+    });
+
+
+
+    //  var onFilterChange = window.common.debounce(function (button) {
+    //     renderPhotosByFilter(button.id, button);
+    //   });
+
+    //   var onFilterClick = function (evt) {
+    //     var element = evt.target;
+    //     if (element.tagName === 'BUTTON' && element.classList.contains('img-filters__button')) {
+    //       onFilterChange(element);
+    //     }
+    //   };
+    //   showFilter();
+    // };
 
     var onSortChange = function (userFilter) {
       switch (userFilter.sort) {
@@ -292,9 +311,13 @@
       }
       if (window.slider) {
         window.slider.init(links);
+      } else  {
+        window.dom.addClassName(links.rangeFilter, 'modal--hidden');
       }
       if (window.filter) {
         window.filter.init(links);
+      } else  {
+        window.dom.addClassName(links.formFilter, 'modal--hidden');
       }
     };
 

@@ -19,7 +19,7 @@
       if (button) {
         button.tabIndex = window.general.getDefaultTabIndex();
       }
-      if (specific) {
+      if (specific && messageLink) {
         specific.insertionPoint.removeChild(messageLink);
         specific.insertionPoint = null;
         messageLink = null;
@@ -78,10 +78,12 @@
 
       if (specific && previousObject) {
         var div = document.createElement('div');
+        var layoutStyle = specific.fixed ?  'position: fixed; top: 50%; left: 50%; margin-left: -240px; width: 480px;' :
+         'position: absolute; top: 48px ; left: -10px; width: 268px;';
         div.style =
-        'position: absolute; z-index: 5; font-size: 14px; width: 268px; text-align: center; padding: 20px; background-color: rgb(255, 233, 111); ' +
+        layoutStyle + 'z-index: 5; font-size: 14px;  text-align: center; padding: 20px; background-color: rgb(255, 233, 111); ' +
         'background-image: radial-gradient(circle, rgba(255, 255, 255, 0.7) 10%, rgba(255, 255, 255, 0.5) 50%,  transparent 100%); ' +
-        'box-shadow: 0 6px 15px 0 rgba(0, 1, 1, 0.45); border-radius: 6px; top: 48px ; left: -10px;';
+        'box-shadow: 0 6px 15px 0 rgba(0, 1, 1, 0.45); border-radius: 6px;';
         div.classList.add('card__popup');
         div.appendChild(createChild('h2', specific.title));
         div.appendChild(createChild('p', specific.properties));

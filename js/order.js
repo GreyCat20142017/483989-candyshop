@@ -106,18 +106,31 @@
       return false;
     };
 
+    var onPostDataError = function (errorMessage) {
+      window.message.init(links.messages.errorMessage, errorMessage);
+    };
+
+    var onPostData = function () {
+      window.message.init(links.messages.successMessage, 'Данные успешно отправлены', document.activeElement);
+      resetFormInputs();
+      bus.emitEvent(events.RESET_BASKET);
+    };
+
     var onFormSubmit = function (evt) {
       evt.preventDefault();
       if (getValidationResult()) {
-        resetFormInputs();
+        if (window.backend) {
+          window.backend.postData(new FormData(links.form), onPostData, onPostDataError);
+        }
       }
     };
 
     var setButtonDisableState = function (buttonDisabled) {
+      var orderButtonDisabledClassName = 'goods__order-link--disabled';
       if (links.orderLink) {
-        var nowDisabled = links.orderLink.classList.contains('goods__order-link--disabled');
+        var nowDisabled = links.orderLink.classList.contains(orderButtonDisabledClassName);
         if (buttonDisabled !== nowDisabled) {
-          window.dom[buttonDisabled ? 'addClassName' : 'removeClassName'](links.orderLink, 'goods__order-link--disabled');
+          window.dom[buttonDisabled ? 'addClassName' : 'removeClassName'](links.orderLink, orderButtonDisabledClassName);
         }
       }
     };

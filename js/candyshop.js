@@ -1,6 +1,13 @@
 'use strict';
 
 (function () {
+  var MODULES = ['common', 'general', 'dom', 'mediator', 'candyevents', 'backend', 'main' , 'catalog', 'basket', 'order'];
+
+  var checkModuleAddition = function () {
+    return !MODULES.some(function (item) {
+      return !window.hasOwnProperty(item);
+    });
+  };
 
   var initMessages = function () {
     var modals = document.querySelectorAll('.modal');
@@ -9,7 +16,7 @@
 
   var tagMain = document.querySelector('main');
   var formFilter = window.dom.getElementBySelector(tagMain, '.catalog__sidebar > form');
-  var rangeFilter = window.dom.getElementBySelector(formFilter, '.range__filter');
+  var rangeFilter = window.dom.getElementBySelector(formFilter, '.range');
   var formPaymentDeliver = window.dom.getElementBySelector(tagMain, '.buy > form');
   var deliverContainer = window.dom.getElementBySelector(tagMain, '.deliver');
   var paymentContainer = window.dom.getElementBySelector(tagMain, '.payment');
@@ -47,15 +54,20 @@
     goodsTotalAmount: window.dom.getElementBySelector(formPaymentDeliver, '.goods__amount')
   };
 
+  if (checkModuleAddition()) {
+    window.main.initApp(links);
+  } else {
+    if (window.message) {
+      window.message.init(null, '', document.activeElement, {title: 'Произошла ошибка', composition: 'Не удалось загрузить все необходимые модули',
+        properties: 'Функциональность приложения отключена', insertionPoint: tagMain, fixed: true});
+    }
+  }
+
   tagMain = null;
   rangeFilter = null;
   formFilter = null;
   formPaymentDeliver = null;
   deliverContainer = null;
   paymentContainer = null;
-
-  if (window.main) {
-    window.main.initApp(links);
-  }
 
 })();
