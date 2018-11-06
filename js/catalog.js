@@ -48,6 +48,9 @@
       window.dom.setAttributeBySelector(element, '.card__composition-list', 'textContent', data.nutritionFacts.content);
       window.dom.replaceClassNameByObject(element, getClassNameByAmount(data.amount), CARD_CLASSES);
       window.dom.replaceClassNameBySelector(element, '.stars__rating', getClassNameByRating(data.rating.value), STAR_CLASSES);
+      if (data.selected) {
+        window.dom.addClassNameBySelector(element, '.card__btn-favorite', 'card__btn-favorite--selected');
+      };
       element.setAttribute(CARD_ID, data.id);
       window.dom.setAttributeBySelector(element, '.card__btn-composition', CARD_ID, data.id);
       window.dom.setAttributeBySelector(element, '.card__btns-wrap', CARD_ID, data.id);
