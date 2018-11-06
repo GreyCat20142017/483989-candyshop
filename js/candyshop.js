@@ -37,6 +37,7 @@
     deliverButtons: window.dom.getElementBySelector(deliverContainer, '.deliver__toggle'),
     deliverMap: window.dom.getElementBySelector(deliverContainer, '.deliver__store-map-img'),
     deliverMapDescription: window.dom.getElementBySelector(deliverContainer, '.deliver__store-describe'),
+    deliverDefaultStore: window.dom.getElementBySelector(deliverContainer, '#store-academicheskaya'),
     rangeFilter: rangeFilter,
     rangeLine: window.dom.getElementBySelector(rangeFilter, '.range__fill-line'),
     rangePinA: window.dom.getElementBySelector(rangeFilter, '.range__btn--left'),

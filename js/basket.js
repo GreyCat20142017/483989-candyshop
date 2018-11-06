@@ -112,7 +112,7 @@
       if (targetIndex >= 0) {
         target = basketCards[targetIndex];
         target.amount = (target.amount) ? (target.amount + data.amount) : data.amount;
-        var itemSelector = '.goods_card[data-id="' + data.cardID + '"] .card-order__count';
+        var itemSelector = '.goods_card[' + CARD_ID + '="' + data.cardID + '"] .card-order__count';
         window.dom.setAttributeBySelector(links.basketContainer, itemSelector, 'value', target.amount);
       } else {
         target = Object.assign({}, data.source);
@@ -122,7 +122,6 @@
       }
       refreshBasketState(basketCards);
     };
-
 
     var removeUnitFromBasket = function (cardID, element, basketAmount) {
       var basketIndex = window.common.getIndexByID(basketCards, cardID);

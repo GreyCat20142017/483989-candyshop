@@ -2,34 +2,40 @@
 
 (function () {
 
-  var FILTER_TYPES = {'food-type': false, 'food-property': false, 'mark': true, 'all': true};
-  /* var SORT_TYPES = {'popular': true,'expensive': true, 'cheep': true, 'rating': true}; */
-  var DEFAULT_SORT_STATE = 'popular';
-
+  var constants = window.constants;
   var bus = window.mediator.bus;
   var events = window.candyevents;
+
+  var strongFilters = {};
+  if (constants) {
+    window.common.getArrayFromObject(constants.FILTER_TYPES).forEach(function (item) {
+      if (item.strong) {
+        strongFilters[item.name] = true;
+      }
+    });
+  }
 
   var setFilterAmountByCard = function (descriptions, descriptionItem, card) {
     var description = descriptions[descriptionItem];
     switch (description.filterType) {
-      case 'food-type':
+      case constants.FILTER_TYPES.foodType.name:
         description.amount += (description.name === card.kind) ? 1 : 0;
         break;
-      case 'food-property':
-        var propertyName = descriptionItem.replace('-free', '');
+      case constants.FILTER_TYPES.foodProperty.name:
+        var propertyName = descriptionItem.replace(constants.INVERT_PROPERTY_SUFFIX, '');
         description.amount += +((propertyName === descriptionItem) ? card.nutritionFacts[propertyName] : !card.nutritionFacts[propertyName]);
         break;
-      case 'mark':
-        if (descriptionItem === 'availability') {
+      case constants.FILTER_TYPES.mark.name:
+        if (descriptionItem === constants.FILTER_SUBTYPES.availability) {
           description.amount += +(card.amount > 0);
-        } else if (descriptionItem === 'favorite') {
+        } else if (descriptionItem === constants.FILTER_SUBTYPES.favorite) {
           description.amount += +(card.selected > 0);
         }
         break;
-      case 'price':
+      case constants.FILTER_TYPES.price.name:
         description.amount += +(card.price > 0);
         break;
-      case 'sort':
+      case constants.SORT_NAME:
         break;
       default:
         break;
@@ -99,14 +105,14 @@
     };
 
     var getBasicUnsetStatus = function () {
-      return (filter.state['food-type'].length === 0) &&
-      (filter.state['food-property'].length === 0) &&
-      (filter.state['mark'].length === 0);
+      return (filter.state[constants.FILTER_TYPES.foodType.name].length === 0) &&
+      (filter.state[constants.FILTER_TYPES.foodProperty.name].length === 0) &&
+      (filter.state[constants.FILTER_TYPES.mark.name].length === 0);
     };
 
     var getPriceUnsetStatus = function () {
-      return (filter.state['price'].max === filter.upperBound) &&
-      (filter.state['price'].min === 0);
+      return (filter.state[constants.FILTER_TYPES.price.name].max === filter.upperBound) &&
+      (filter.state[constants.FILTER_TYPES.price.name].min === 0);
     };
 
     var getAllUnsetStatus = function () {
@@ -114,11 +120,16 @@
     };
 
     var getDefaultFilterState = function (upperBound) {
-      return {'food-type': [], 'food-property': [], 'mark': [], 'price': {min: 0, max: upperBound}};
+      var temporaryObject = {};
+      temporaryObject[constants.FILTER_TYPES.foodType.name] = [];
+      temporaryObject[constants.FILTER_TYPES.foodProperty.name] = [];
+      temporaryObject[constants.FILTER_TYPES.mark.name] = [];
+      temporaryObject[constants.FILTER_TYPES.price.name] = {min: 0, max: upperBound};
+      return temporaryObject;
     };
 
     var getDefaultSortState = function () {
-      return DEFAULT_SORT_STATE;
+      return constants.DEFAULT_SORT_STATE;
     };
 
     var resetAllFilter = function () {
@@ -133,7 +144,7 @@
     };
 
     var restoreCurrent = function (filterType, filterValue, filterChecked) {
-      if (filterType === 'mark' && filterChecked) {
+      if (filterType === constants.FILTER_TYPES.mark.name && filterChecked) {
         filter.description[filterValue].basicDom.checked = filterChecked;
         setThisFilter(filterType, filterValue);
       }
@@ -145,16 +156,16 @@
     });
 
     var onFilterStateChange = window.common.debounce(function (filterType, filterValue, filterChecked) {
-      /*  Если по типу фильтра в объекте FILTER_TYPES сответствующее значение === Истина - нужно сбросить текущее состояние всех фильтров */
-      /*  Но если это фильтр типа mark, переключенный в checked===true - нужно восстановить его состояние после сброса. Во набредила-то... */
-      if (FILTER_TYPES[filterType]) {
+      /*  Если значение strong для типа фильтра === Истина - нужно сбросить текущее состояние всех фильтров */
+      /*  Но дополнительно если это фильтр типа mark, переключенный в checked === true - нужно восстановить его состояние после сброса. Во набредила-то... */
+      if (strongFilters[filterType]) {
         resetAllFilter();
         restoreCurrent(filterType, filterValue, filterChecked);
       }
-      if (filterType !== 'all') {
+      if (filterType !== constants.FILTER_TYPES.all.name) {
         if (filterChecked) {
           setThisFilter(filterType, filterValue);
-          unsetContradictoryFilter((filterType === 'mark') ? ['food-type', 'food-property'] : ['mark']);
+          unsetContradictoryFilter((filterType === constants.FILTER_TYPES.mark.name) ? [constants.FILTER_TYPES.foodType.name, constants.FILTER_TYPES.foodProperty.name] : [constants.FILTER_TYPES.mark.name]);
         } else {
           unsetThisFilter(filterType, filterValue);
         }
@@ -167,7 +178,7 @@
       var element = evt.target;
       if (element.tagName === 'INPUT') {
         if (filter.description[element.value]) {
-          if (element.name === 'sort') {
+          if (element.name === constants.SORT_NAME) {
             onSortStateChange(element.value);
           } else {
             onFilterStateChange(element.name, element.value, element.checked);
@@ -183,16 +194,16 @@
     };
 
     var onCheckFavorite = function () {
-      checkMarkState('favorite');
+      checkMarkState(constants.FILTER_SUBTYPES.favorite);
     };
 
     var onCheckAvailability = function () {
-      checkMarkState('availability');
+      checkMarkState(constants.FILTER_SUBTYPES.availability);
     };
 
     var onFormSubmit = function (evt) {
       evt.preventDefault();
-      onFilterStateChange('all', 'all', true);
+      onFilterStateChange(constants.FILTER_TYPES.all.name, constants.FILTER_TYPES.all.name, true);
     };
 
     var setPriceFilter = function (min, max) {
@@ -212,15 +223,15 @@
           temporaryObject[element.value.toString()] = {name: label.textContent, amount: 0, filterType: element.name,
             contentDom: label.nextElementSibling, basicDom: element, keyProperty: element.value.toString()
           };
-          if (element.type.toLowerCase() !== 'radio') {
+          if (element.type.toUpperCase() !== 'RADIO') {
             label.nextElementSibling.textContent = '(' + temporaryObject[element.value.toString()].amount + ')';
           }
         });
       }
       if (links.formFilterPTag) {
         var label = links.formFilterPTag.children[0];
-        temporaryObject['price'] = {name: 'Цена', amount: 0, filterType: 'price',
-          contentDom: label, basicDom: links.formFilterPTag, keyProperty: 'price'
+        temporaryObject[constants.FILTER_TYPES.price.name] = {name: 'Цена', amount: 0, filterType: constants.FILTER_TYPES.price.name,
+          contentDom: label, basicDom: links.formFilterPTag, keyProperty: constants.FILTER_TYPES.price.name
         };
       }
       return temporaryObject;
@@ -243,9 +254,9 @@
 
     var filter = {
       description: generateFilterDescription(),
-      state: getDefaultFilterState(100),
-      sort: 'popular',
-      priceUpperBound: 100,
+      state: getDefaultFilterState(constants.DEFAULT_UPPER_BOUND),
+      sort: constants.DEFAULT_SORT_STATE,
+      priceUpperBound: constants.DEFAULT_UPPER_BOUND,
       allUnset: true
     };
 

@@ -10,6 +10,7 @@
   var IMG_PATH = 'img/cards/';
   var CARD_ID = 'data-id';
 
+  var constants = window.constants;
   var bus = window.mediator.bus;
   var events = window.candyevents;
 
@@ -117,7 +118,7 @@
 
     var checkCatalogAmount = function (dataRecord, ind, anyway) {
       if (anyway || (dataRecord.amount >= CARD_CLASSES_LOW_BORDER) && (dataRecord.amount <= (CARD_CLASSES_UPPER_BORDER + 1))) {
-        var element = window.dom.getElementBySelector(links.catalogContainer, '.catalog__card[data-id="' + ind + '"]');
+        var element = window.dom.getElementBySelector(links.catalogContainer, '.catalog__card[' + CARD_ID + '="' + ind + '"]');
         window.dom.replaceClassNameByObject(element, getClassNameByAmount(dataRecord.amount), CARD_CLASSES);
       }
     };
@@ -160,18 +161,18 @@
     var isMatch = function (filterElement, card) {
       var matchResult = false;
       switch (filterElement.filterType) {
-        case 'food-type':
+        case constants.FILTER_TYPES.foodType.name:
           matchResult = (filterElement.name === card.kind);
           break;
-        case 'food-property':
-          var propertyName = filterElement.keyProperty.replace('-free', '');
+        case constants.FILTER_TYPES.foodProperty.name:
+          var propertyName = filterElement.keyProperty.replace(constants.INVERT_PROPERTY_SUFFIX, '');
           matchResult = ((propertyName === filterElement.keyProperty) ? card.nutritionFacts[propertyName] : !card.nutritionFacts[propertyName]);
           break;
-        case 'mark':
-          if (filterElement.keyProperty === 'availability') {
+        case constants.FILTER_TYPES.mark.name:
+          if (filterElement.keyProperty === constants.FILTER_SUBTYPES.availability) {
             matchResult = (card.amount > 0);
           }
-          if (filterElement.keyProperty === 'favorite') {
+          if (filterElement.keyProperty === constants.FILTER_SUBTYPES.favorite) {
             matchResult = (card.selected);
           }
           break;
@@ -184,15 +185,15 @@
     var getMatchResult = function (card, userFilter) {
       var checkedFilters = userFilter.state;
       if (checkedFilters.mark.length > 0) {
-        return isMatch(userFilter.description[checkedFilters['mark'][0]], card) &&
+        return isMatch(userFilter.description[checkedFilters[constants.FILTER_TYPES.mark.name][0]], card) &&
         (card.price >= checkedFilters.price.min) && (card.price <= checkedFilters.price.max);
       } else {
-        var result = checkedFilters['food-type'].length === 0 ? true : false;
-        for (var i = 0; i < checkedFilters['food-type'].length; i++) {
-          result = result || isMatch(userFilter.description[checkedFilters['food-type'][i]], card);
+        var result = checkedFilters[constants.FILTER_TYPES.foodType.name].length === 0 ? true : false;
+        for (var i = 0; i < checkedFilters[constants.FILTER_TYPES.foodType.name].length; i++) {
+          result = result || isMatch(userFilter.description[checkedFilters[constants.FILTER_TYPES.foodType.name][i]], card);
         }
-        for (i = 0; i < checkedFilters['food-property'].length; i++) {
-          result = result && isMatch(userFilter.description[checkedFilters['food-property'][i]], card);
+        for (i = 0; i < checkedFilters[constants.FILTER_TYPES.foodProperty.name].length; i++) {
+          result = result && isMatch(userFilter.description[checkedFilters[constants.FILTER_TYPES.foodProperty.name][i]], card);
         }
         result = result && (card.price >= checkedFilters.price.min) && (card.price <= checkedFilters.price.max);
         return result;
@@ -219,16 +220,16 @@
 
     var onSortChange = function (userFilter) {
       switch (userFilter.sort) {
-        case 'popular' :
+        case constants.SORT_TYPES.popular:
           renderCatalog(window.catalog.cardsByConditions, links.catalogCardTemplate, links.catalogContainer);
           break;
-        case 'expensive' :
+        case constants.SORT_TYPES.expensive:
           renderCatalog(getCardsByPrice(window.catalog.cardsByConditions, false), links.catalogCardTemplate, links.catalogContainer);
           break;
-        case 'cheep' :
+        case constants.SORT_TYPES.cheap:
           renderCatalog(getCardsByPrice(window.catalog.cardsByConditions, true), links.catalogCardTemplate, links.catalogContainer);
           break;
-        case 'rating' :
+        case constants.SORT_TYPES.rating:
           renderCatalog(getCardsByRating(window.catalog.cardsByConditions), links.catalogCardTemplate, links.catalogContainer);
           break;
         default:
@@ -289,10 +290,6 @@
       if (links.catalogContainer) {
         bus.addEvent(events.ADD_FROM_BASKET, moveUnitFromBasket);
         bus.addEvent(events.REQUEST_TO_BASKET, moveUnitToBasket);
-        bus.addEvent(events.CHANGE_FILTER, renderCatalogByFilter);
-        bus.addEvent(events.REQUEST_FILTER_CATALOG, onRequestFromFilter);
-        bus.addEvent(events.CHANGE_FILTER, onFilterChange);
-        bus.addEvent(events.CHANGE_SORT, onSortChange);
         links.catalogContainer.addEventListener('click', onCatalogClick);
       }
 
@@ -304,7 +301,10 @@
       } else {
         window.dom.addClassName(links.rangeFilter, 'modal--hidden');
       }
-      if (window.filter) {
+      if (window.filter && window.constants) {
+        bus.addEvent(events.REQUEST_FILTER_CATALOG, onRequestFromFilter);
+        bus.addEvent(events.CHANGE_FILTER, onFilterChange);
+        bus.addEvent(events.CHANGE_SORT, onSortChange);
         window.filter.init(links);
       } else {
         window.dom.addClassName(links.formFilter, 'modal--hidden');
